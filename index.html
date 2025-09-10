@@ -23,6 +23,7 @@
       flex-wrap: wrap;
       gap: 20px;
       padding: 20px;
+      position: relative;
     }
     .inputs {
       width: 100%;
@@ -52,7 +53,7 @@
       background: #1f6390;
     }
     .card {
-      position: relative;
+      position: absolute;
       width: 200px;
       height: 250px;
       border-radius: 12px;
@@ -104,7 +105,6 @@
       clip-path: polygon(0 100%, 100% 100%, 0 0);
       cursor: nwse-resize;
     }
-
     /* 🔹 نافذة منبثقة */
     .modal {
       display: none;
@@ -164,21 +164,39 @@
     </div>
   </div>
 
-  <script>
-    const siteList = document.getElementById("siteList");
-    let editIndex = null;
+  <!-- 🔹 Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-    function loadSites() {
-      const sites = JSON.parse(localStorage.getItem("sites") || "[]");
+  <script>
+    // 🔹 ضع هنا إعدادات مشروع Firebase الخاص بك
+    const firebaseConfig = {
+      apiKey: "API_KEY_HERE",
+      authDomain: "PROJECT_ID.firebaseapp.com",
+      projectId: "PROJECT_ID",
+      storageBucket: "PROJECT_ID.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const siteList = document.getElementById("siteList");
+    let editId = null;
+
+    // 🔹 تحميل المواقع والتحديث اللحظي
+    db.collection("sites").onSnapshot(snapshot => {
       siteList.innerHTML = "";
-      sites.forEach((site, index) => {
+      snapshot.forEach(doc => {
+        const site = doc.data();
+        const id = doc.id;
+
         const card = document.createElement("div");
         card.className = "card";
         card.style.left = site.left || "0px";
         card.style.top = site.top || "0px";
         card.style.width = site.width || "200px";
         card.style.height = site.height || "250px";
-        card.style.position = "absolute";
 
         const img = document.createElement("img");
         img.src = site.image || "https://via.placeholder.com/200x250";
@@ -187,10 +205,10 @@
         const content = document.createElement("div");
         content.className = "card-content";
         content.innerHTML = `<div>${site.name}</div>
-                             <div class="actions">
-                               <button onclick="openEdit(${index})">✏️ تعديل</button>
-                               <button onclick="deleteSite(${index})">🗑 حذف</button>
-                             </div>`;
+          <div class="actions">
+            <button onclick="openEdit('${id}')">✏️ تعديل</button>
+            <button onclick="deleteSite('${id}')">🗑 حذف</button>
+          </div>`;
 
         const dragHandle = document.createElement("div");
         dragHandle.className = "drag-handle";
@@ -203,82 +221,83 @@
         card.appendChild(dragHandle);
         card.appendChild(resizeHandle);
 
-        enableDragResize(card, index);
+        enableDragResize(card, id);
 
         siteList.appendChild(card);
       });
-    }
+    });
 
+    // 🔹 إضافة موقع
     function addSite() {
       const name = document.getElementById("siteName").value.trim();
       const url = document.getElementById("siteUrl").value.trim();
       const file = document.getElementById("siteImage").files[0];
 
-      if (!name || !url) {
-        alert("من فضلك أدخل الاسم والرابط");
-        return;
-      }
+      if (!name || !url) return alert("من فضلك أدخل الاسم والرابط");
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const sites = JSON.parse(localStorage.getItem("sites") || "[]");
-        sites.push({ name, url, image: e.target.result });
-        localStorage.setItem("sites", JSON.stringify(sites));
-        loadSites();
-      };
       if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          db.collection("sites").add({ name, url, image: e.target.result });
+        };
         reader.readAsDataURL(file);
       } else {
-        const sites = JSON.parse(localStorage.getItem("sites") || "[]");
-        sites.push({ name, url });
-        localStorage.setItem("sites", JSON.stringify(sites));
-        loadSites();
+        db.collection("sites").add({ name, url });
       }
     }
 
-    function deleteSite(index) {
-      const sites = JSON.parse(localStorage.getItem("sites") || "[]");
-      sites.splice(index, 1);
-      localStorage.setItem("sites", JSON.stringify(sites));
-      loadSites();
+    // 🔹 حذف موقع
+    function deleteSite(id) {
+      db.collection("sites").doc(id).delete();
     }
 
-    function openEdit(index) {
-      const sites = JSON.parse(localStorage.getItem("sites") || "[]");
-      const site = sites[index];
-      editIndex = index;
-      document.getElementById("editName").value = site.name;
-      document.getElementById("editUrl").value = site.url;
-      document.getElementById("editModal").style.display = "flex";
+    // 🔹 فتح نافذة التعديل
+    function openEdit(id) {
+      editId = id;
+      db.collection("sites").doc(id).get().then(doc => {
+        const site = doc.data();
+        document.getElementById("editName").value = site.name;
+        document.getElementById("editUrl").value = site.url;
+        document.getElementById("editModal").style.display = "flex";
+      });
     }
 
     function closeModal() {
       document.getElementById("editModal").style.display = "none";
     }
 
+    // 🔹 حفظ التعديلات
     function saveEdit() {
-      const sites = JSON.parse(localStorage.getItem("sites") || "[]");
-      const site = sites[editIndex];
-      site.name = document.getElementById("editName").value.trim();
-      site.url = document.getElementById("editUrl").value.trim();
-
+      const name = document.getElementById("editName").value.trim();
+      const url = document.getElementById("editUrl").value.trim();
       const file = document.getElementById("editImage").files[0];
+
       if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          site.image = e.target.result;
-          localStorage.setItem("sites", JSON.stringify(sites));
-          loadSites();
+          db.collection("sites").doc(editId).update({
+            name, url, image: e.target.result
+          });
         };
         reader.readAsDataURL(file);
       } else {
-        localStorage.setItem("sites", JSON.stringify(sites));
-        loadSites();
+        db.collection("sites").doc(editId).update({ name, url });
       }
       closeModal();
     }
 
-    function enableDragResize(card, index) {
+    // 🔹 حفظ موقع وحجمه بعد السحب أو التكبير
+    function saveCardPosition(card, id) {
+      db.collection("sites").doc(id).update({
+        left: card.style.left,
+        top: card.style.top,
+        width: card.style.width,
+        height: card.style.height
+      });
+    }
+
+    // 🔹 دوال السحب والتكبير
+    function enableDragResize(card, id) {
       const dragHandle = card.querySelector(".drag-handle");
       const resizeHandle = card.querySelector(".resize-handle");
 
@@ -299,7 +318,7 @@
         document.addEventListener("mousemove", onMouseMove);
         document.addEventListener("mouseup", () => {
           document.removeEventListener("mousemove", onMouseMove);
-          saveCardPosition(card, index);
+          saveCardPosition(card, id);
         }, { once: true });
       });
 
@@ -321,24 +340,13 @@
 
         function onMouseUp() {
           document.removeEventListener("mousemove", onMouseMove);
-          saveCardPosition(card, index);
+          saveCardPosition(card, id);
         }
 
         document.addEventListener("mousemove", onMouseMove);
         document.addEventListener("mouseup", onMouseUp, { once: true });
       });
     }
-
-    function saveCardPosition(card, index) {
-      const sites = JSON.parse(localStorage.getItem("sites") || "[]");
-      sites[index].left = card.style.left;
-      sites[index].top = card.style.top;
-      sites[index].width = card.style.width;
-      sites[index].height = card.style.height;
-      localStorage.setItem("sites", JSON.stringify(sites));
-    }
-
-    loadSites();
   </script>
 </body>
 </html>
