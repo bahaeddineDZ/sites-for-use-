@@ -11,22 +11,26 @@
   --danger:#e74c3c;
   --muted:#7f8c8d;
   --card:#ffffff;
+  --font-size:16px;
 }
 *{box-sizing:border-box;}
-body{font-family:Tahoma, Arial, sans-serif;margin:0;padding:0;min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#eef6fb,#f4f6f9);font-size:14px;}
-header{background:var(--primary);color:#fff;padding:14px 18px;display:flex;gap:12px;align-items:center;justify-content:space-between;}
+body{font-family:Tahoma, Arial, sans-serif;margin:0;padding:0;min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#eef6fb,#f4f6f9);font-size:var(--font-size);}
+header{background:var(--primary);color:#fff;padding:14px 18px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
 header h1{margin:0;font-size:18px;}
-.user-area{display:flex;align-items:center;gap:10px;}
+.user-area{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .user-pic{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.2);}
 .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;}
 .btn.secondary{background:#fff;color:var(--accent);border:1px solid rgba(0,0,0,0.06);}
-.layout{display:flex;gap:18px;padding:18px;flex:1;align-items:flex-start;}
+.layout{display:flex;gap:18px;padding:18px;flex:1;align-items:flex-start;flex-wrap:wrap;}
 .board{flex:1;min-width:320px;position:relative;}
 .controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
 .controls input{padding:10px;border-radius:10px;border:1px solid #d0d7de;font-size:14px;flex:1;min-width:140px;}
-.controls .add-btn{background:var(--accent);padding:10px 16px;border-radius:10px;color:#fff;border:none;cursor:pointer;}
-.controls .bg-btn{background:#2ecc71;color:#fff;padding:10px 16px;border-radius:10px;border:none;cursor:pointer;}
-#siteList{position:relative;min-height:420px;border-radius:12px;padding:12px;background:transparent;resize:vertical;overflow:auto;}
+.controls .add-btn,.controls .bg-btn,.controls .page-btn,.controls .font-btn{padding:10px 16px;border-radius:10px;border:none;cursor:pointer;}
+.controls .add-btn{background:var(--accent);color:#fff;}
+.controls .bg-btn{background:#2ecc71;color:#fff;}
+.controls .page-btn{background:#8e44ad;color:#fff;}
+.controls .font-btn{background:#e67e22;color:#fff;}
+#siteList{position:relative;min-height:420px;border-radius:12px;padding:12px;background:transparent;resize:both;overflow:auto;}
 .card{position:absolute;width:200px;height:250px;border-radius:12px;box-shadow:0 8px 18px rgba(0,0,0,0.12);overflow:hidden;background:var(--card);transition:transform .15s;}
 .card:hover{transform:translateY(-6px);}
 .card img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer;}
@@ -44,7 +48,7 @@ header h1{margin:0;font-size:18px;}
 .site-item{display:flex;gap:8px;align-items:center;}
 .site-item img{width:48px;height:36px;object-fit:cover;border-radius:6px;}
 .site-item a{color:var(--accent);text-decoration:none;display:block;}
-.chat-panel{display:flex;flex-direction:column;gap:8px;background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);position:relative;}
+.chat-panel{display:flex;flex-direction:column;gap:8px;background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);position:relative;resize:vertical;overflow:auto;}
 #chatBox{height:260px;overflow:auto;border-radius:8px;padding:8px;background:#fbfdff;border:1px solid #eef5fb;}
 .msg{display:inline-block;padding:8px 12px;margin:5px 0;border-radius:15px;max-width:70%;clear:both;word-wrap:break-word;}
 .chat-controls{display:flex;gap:5px;margin-top:6px;position:relative;}
@@ -54,13 +58,7 @@ header h1{margin:0;font-size:18px;}
 .emoji-panel{display:none;background:white;border:1px solid #ccc;border-radius:10px;padding:10px;max-height:120px;overflow-y:auto;position:absolute;bottom:60px;right:10px;z-index:1000;box-shadow:0 6px 12px rgba(0,0,0,0.15);transition:all 0.2s ease;}
 .emoji-panel span{cursor:pointer;font-size:20px;margin:5px;}
 #chatHint{margin-top:8px;font-size:12px;color:gray;text-align:center;}
-.footer{padding:10px;text-align:center;color:var(--muted);font-size:13px;}
-.font-controls{display:flex;gap:6px;align-items:center;margin-bottom:6px;}
-.font-controls button{padding:4px 8px;border-radius:6px;border:none;background:#2980b9;color:#fff;cursor:pointer;}
-.font-controls button:hover{background:#1f5f87;}
-.page-tabs{display:flex;gap:6px;margin-bottom:6px;}
-.page-tabs button{padding:6px 12px;border:none;border-radius:6px;background:#bdc3c7;color:#2c3e50;cursor:pointer;}
-.page-tabs button.active{background:#2980b9;color:#fff;}
+footer{padding:10px;text-align:center;color:var(--muted);font-size:13px;}
 @media(max-width:900px){.layout{flex-direction:column}.side{width:100%;}}
 </style>
 </head>
@@ -84,23 +82,13 @@ header h1{margin:0;font-size:18px;}
 <input id="siteImage" placeholder="رابط صورة (اختياري)">
 <button id="addBtn" class="add-btn">➕ إضافة</button>
 <button id="changeBgBtn" class="bg-btn">🎨 تغيير الخلفية</button>
+<button id="addPageBtn" class="page-btn">📄 إضافة صفحة</button>
+<button id="prevPageBtn" class="page-btn">◀ الصفحة السابقة</button>
+<button id="nextPageBtn" class="page-btn">▶ الصفحة التالية</button>
+<button id="increaseFontBtn" class="font-btn">🔠 تكبير الخط</button>
+<button id="decreaseFontBtn" class="font-btn">🔡 تصغير الخط</button>
 </div>
-
-<div class="font-controls">
-حجم الخط:
-<button data-size="12">12px</button>
-<button data-size="14" class="active">14px</button>
-<button data-size="16">16px</button>
-<button data-size="18">18px</button>
-</div>
-
-<div class="page-tabs" id="pageTabs">
-<button data-page="page-1" class="active">صفحة 1</button>
-<button data-page="page-2">صفحة 2</button>
-<button data-page="page-3">صفحة 3</button>
-</div>
-
-<div id="siteList" data-page="page-1"></div>
+<div id="siteList" aria-live="polite"></div>
 </div>
 
 <div class="side">
@@ -123,23 +111,14 @@ header h1{margin:0;font-size:18px;}
 </div>
 </div>
 
-<footer class="footer">© مكتبتي للمواقع — BBE</footer>
+<footer>© مكتبتي للمواقع — BBE</footer>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
-  authDomain: "site-for-use.firebaseapp.com",
-  projectId: "site-for-use",
-  storageBucket: "site-for-use.appspot.com",
-  messagingSenderId: "44820921915",
-  appId: "1:44820921915:web:27ff432c93b013e7a2a61e",
-  measurementId: "G-LRLK1DGEX7"
-};
-
+const firebaseConfig = { /* إعدادات Firebase الخاصة بك هنا */ };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -161,176 +140,175 @@ const sendMsgBtn=document.getElementById("sendMsgBtn");
 const chatHint=document.getElementById("chatHint");
 const emojiPanel = document.getElementById("emojiPanel");
 const changeBgBtn = document.getElementById("changeBgBtn");
-const pageTabs = document.getElementById("pageTabs");
-const fontButtons = document.querySelectorAll(".font-controls button");
+const addPageBtn = document.getElementById("addPageBtn");
+const prevPageBtn = document.getElementById("prevPageBtn");
+const nextPageBtn = document.getElementById("nextPageBtn");
+const increaseFontBtn = document.getElementById("increaseFontBtn");
+const decreaseFontBtn = document.getElementById("decreaseFontBtn");
 
 let currentUser=null;
 let editId=null;
-let currentPage="page-1";
+let currentPageIndex=0;
+let pages=[];
 
-// Authentication
-loginBtn.addEventListener("click",async()=>{try{await signInWithPopup(auth,provider);}catch(e){alert("فشل تسجيل الدخول: "+e.message);}});
-logoutBtn.addEventListener("click",async()=>{await signOut(auth);});
-onAuthStateChanged(auth,user=>{
-  currentUser=user||null;
-  loginBtn.style.display=user?"none":"inline-block";
-  logoutBtn.style.display=user?"inline-block":"none";
-  userPic.src=user?.photoURL||"";
-  userPic.style.display=user?.photoURL?"inline-block":"none";
-  userNameEl.textContent=user?.displayName||user?.email||"مستخدم";
-  userNameEl.style.display=user?"inline-block":"none";
-  chatHint.textContent=user?"مسجّل الدخول — يمكنك إرسال الرسائل وإضافة المواقع.":"سجّل الدخول لتستطيع الكتابة.";
+// --- Authentication ---
+loginBtn.addEventListener("click", async()=>{try{await signInWithPopup(auth,provider);}catch(e){alert("فشل تسجيل الدخول: "+e.message);}});
+logoutBtn.addEventListener("click", async()=>{await signOut(auth);});
+onAuthStateChanged(auth, async user=>{
+    currentUser=user||null;
+    loginBtn.style.display=user?"none":"inline-block";
+    logoutBtn.style.display=user?"inline-block":"none";
+    userPic.src=user?.photoURL||"";
+    userPic.style.display=user?.photoURL?"inline-block":"none";
+    userNameEl.textContent=user?.displayName||user?.email||"مستخدم";
+    userNameEl.style.display=user?"inline-block":"none";
+    chatHint.textContent=user?"مسجّل الدخول — يمكنك إرسال الرسائل وإضافة المواقع.":"سجّل الدخول لتستطيع الكتابة.";
 
-  if(user) loadUserSettings(user.uid);
+    if(user){
+        const userDoc = await getDoc(doc(db,"users",user.uid));
+        if(userDoc.exists()){
+            const data=userDoc.data();
+            if(data.bgUrl){ document.body.style.background = `url(${data.bgUrl}) no-repeat center center fixed`; document.body.style.backgroundSize="cover"; }
+            if(data.fontSize){ document.documentElement.style.setProperty('--font-size', data.fontSize+'px'); }
+        }
+    }else{ document.body.style.background="linear-gradient(180deg,#eef6fb,#f4f6f9)"; }
+    loadPages();
 });
 
-// Load user settings: font size & backgrounds
-async function loadUserSettings(uid){
-  const snap = await getDoc(doc(db,"users",uid));
-  if(snap.exists()){
-    const data = snap.data();
-    if(data.fontSize){
-      document.body.style.fontSize = data.fontSize + "px";
-      fontButtons.forEach(btn=>btn.classList.toggle("active",btn.dataset.size===data.fontSize));
-    }
-    if(data.pageBackgrounds){
-      Object.keys(data.pageBackgrounds).forEach(pid=>{
-        const bg = data.pageBackgrounds[pid];
-        const el = document.querySelector(`[data-page="${pid}"]`);
-        if(el) el.style.background = bg;
-      });
-    }
-  }
+// --- Pages ---
+async function loadPages(){
+    if(!currentUser) return;
+    const pagesSnap = await getDoc(doc(db,"users",currentUser.uid));
+    if(pagesSnap.exists()){ const data=pagesSnap.data(); pages=data.pages||[[]]; } else { pages=[[]]; }
+    if(currentPageIndex>=pages.length) currentPageIndex=pages.length-1;
+    renderSites();
+}
+function addPage(){ pages.push([]); currentPageIndex=pages.length-1; savePages(); renderSites(); }
+function prevPage(){ if(currentPageIndex>0){ currentPageIndex--; renderSites(); } }
+function nextPage(){ if(currentPageIndex<pages.length-1){ currentPageIndex++; renderSites(); } }
+async function savePages(){ if(!currentUser) return; await updateDoc(doc(db,"users",currentUser.uid),{pages}); }
+
+// --- Sites rendering ---
+function renderSites(){
+    siteList.innerHTML=""; sitesShort.innerHTML="";
+    const currentPage = pages[currentPageIndex]||[];
+    currentPage.forEach(site=>{
+        const card=document.createElement("div"); card.className="card";
+        card.style.left=site.left||"0px"; card.style.top=site.top||"0px";
+        card.style.width=site.width||"200px"; card.style.height=site.height||"250px";
+        const img=document.createElement("img"); img.src=site.image||"https://via.placeholder.com/200x250";
+        img.onclick=()=>window.open(site.url,"_blank");
+        const content=document.createElement("div"); content.className="card-content";
+        const title=document.createElement("h3"); title.textContent=site.name;
+        const actions=document.createElement("div"); actions.className="actions";
+        const editBtn=document.createElement("button"); editBtn.className="edit"; editBtn.textContent="✏️ تعديل"; editBtn.onclick=()=>openEdit(site.id);
+        const deleteBtn=document.createElement("button"); deleteBtn.className="delete"; deleteBtn.textContent="🗑 حذف"; deleteBtn.onclick=()=>deleteSite(site.id);
+        actions.appendChild(editBtn); actions.appendChild(deleteBtn);
+        content.appendChild(title); content.appendChild(actions);
+        const dragHandle=document.createElement("div"); dragHandle.className="drag-handle";
+        const resizeHandle=document.createElement("div"); resizeHandle.className="resize-handle";
+        card.appendChild(img); card.appendChild(content); card.appendChild(dragHandle); card.appendChild(resizeHandle);
+        enableDragResize(card,site);
+        siteList.appendChild(card);
+
+        const short=document.createElement("div"); short.className="site-item";
+        short.innerHTML=`<img src="${site.image||'https://via.placeholder.com/48x36'}"><a href="${site.url}" target="_blank">${site.name}</a>`;
+        sitesShort.appendChild(short);
+    });
 }
 
-// Sites handling with page filter
-const sitesCol=collection(db,"sites");
-onSnapshot(sitesCol,snapshot=>{
-  siteList.innerHTML=""; sitesShort.innerHTML="";
-  snapshot.forEach(docSnap=>{
-    const site = docSnap.data(); const id=docSnap.id;
-    if(site.page!==currentPage) return;
-    const card=document.createElement("div"); card.className="card";
-    card.style.left=site.left||"0px"; card.style.top=site.top||"0px";
-    card.style.width=site.width||"200px"; card.style.height=site.height||"250px";
-    const img=document.createElement("img"); img.src=site.image||"https://via.placeholder.com/200x250";
-    img.onclick=()=>window.open(site.url,"_blank");
-    const content=document.createElement("div"); content.className="card-content";
-    const title=document.createElement("h3"); title.textContent=site.name;
-    const actions=document.createElement("div"); actions.className="actions";
-    const editBtn=document.createElement("button"); editBtn.className="edit"; editBtn.textContent="✏️ تعديل"; editBtn.onclick=()=>openEdit(id);
-    const deleteBtn=document.createElement("button"); deleteBtn.className="delete"; deleteBtn.textContent="🗑 حذف"; deleteBtn.onclick=()=>deleteSite(id);
-    actions.appendChild(editBtn); actions.appendChild(deleteBtn);
-    content.appendChild(title); content.appendChild(actions);
-    const dragHandle=document.createElement("div"); dragHandle.className="drag-handle";
-    const resizeHandle=document.createElement("div"); resizeHandle.className="resize-handle";
-    card.appendChild(img); card.appendChild(content); card.appendChild(dragHandle); card.appendChild(resizeHandle);
-    enableDragResize(card,id); siteList.appendChild(card);
-
-    const short=document.createElement("div"); short.className="site-item";
-    short.innerHTML=`<img src="${site.image||'https://via.placeholder.com/48x36'}"><a href="${site.url}" target="_blank">${site.name}</a>`;
-    sitesShort.appendChild(short);
-  });
+// --- Add/Edit site ---
+addBtn.addEventListener("click",()=>{
+    if(!currentUser){ alert("سجّل الدخول أولاً"); return; }
+    const name=siteNameInput.value.trim(), url=siteUrlInput.value.trim();
+    if(!name||!url){ alert("املأ الاسم والرابط"); return; }
+    const image=siteImageInput.value.trim()||"";
+    const site={id:Date.now().toString(), name, url, image, left:"0px", top:"0px", width:"200px", height:"250px"};
+    if(editId){ 
+        let currentPage = pages[currentPageIndex]; 
+        const index=currentPage.findIndex(s=>s.id===editId); 
+        if(index>=0){ currentPage[index].name=name; currentPage[index].url=url; currentPage[index].image=image; } 
+        editId=null; addBtn.textContent="➕ إضافة"; 
+    }else{ pages[currentPageIndex].push(site); }
+    siteNameInput.value=""; siteUrlInput.value=""; siteImageInput.value="";
+    savePages(); renderSites();
 });
-
-// Add/Edit site
-addBtn.addEventListener("click",async()=>{
-  if(!currentUser){alert("سجّل الدخول أولاً");return;}
-  const name=siteNameInput.value.trim(); const url=siteUrlInput.value.trim();
-  if(!name||!url){alert("املأ الاسم والرابط");return;}
-  const image=siteImageInput.value.trim()||"";
-  if(editId){
-    await updateDoc(doc(db,"sites",editId),{name,url,image,page:currentPage});
-    editId=null; addBtn.textContent="➕ إضافة";
-  }else{
-    await addDoc(sitesCol,{name,url,image,page:currentPage,left:"0px",top:"0px",width:"200px",height:"250px"});
-  }
-  siteNameInput.value=""; siteUrlInput.value=""; siteImageInput.value="";
-});
-
-function openEdit(id){editId=id; getDoc(doc(db,"sites",id)).then(snap=>{const data=snap.data(); siteNameInput.value=data.name; siteUrlInput.value=data.url; siteImageInput.value=data.image||""; addBtn.textContent="💾 حفظ التعديل";});}
-function deleteSite(id){if(confirm("هل تريد حذف الموقع؟")) deleteDoc(doc(db,"sites",id));}
-
-// Drag & Resize
-function enableDragResize(card,id){
-  let offsetX=0,offsetY=0,isDragging=false;
-  let startWidth=0,startHeight=0,isResizing=false;
-  const dragHandle=card.querySelector(".drag-handle");
-  const resizeHandle=card.querySelector(".resize-handle");
-  dragHandle.addEventListener("mousedown",e=>{isDragging=true;offsetX=e.clientX-card.offsetLeft;offsetY=e.clientY-card.offsetTop;document.body.style.userSelect="none";});
-  resizeHandle.addEventListener("mousedown",e=>{isResizing=true;startWidth=card.offsetWidth; startHeight=card.offsetHeight;offsetX=e.clientX; offsetY=e.clientY;document.body.style.userSelect="none";});
-  document.addEventListener("mousemove",e=>{
-    if(isDragging){card.style.left=e.clientX-offsetX+"px"; card.style.top=e.clientY-offsetY+"px";}
-    if(isResizing){card.style.width=Math.max(100,startWidth+(e.clientX-offsetX))+"px"; card.style.height=Math.max(120,startHeight+(e.clientY-offsetY))+"px";}
-  });
-  document.addEventListener("mouseup",async()=>{
-    if(isDragging||isResizing){
-      await updateDoc(doc(db,"sites",id),{left:card.style.left,top:card.style.top,width:card.style.width,height:card.style.height});
-      isDragging=false; isResizing=false; document.body.style.userSelect="auto";
+function openEdit(id){ 
+    const site = pages[currentPageIndex].find(s=>s.id===id); 
+    if(site){ editId=id; siteNameInput.value=site.name; siteUrlInput.value=site.url; siteImageInput.value=site.image; addBtn.textContent="💾 حفظ التعديل"; }
+}
+function deleteSite(id){ 
+    if(confirm("هل تريد حذف الموقع؟")){ 
+        let currentPage = pages[currentPageIndex]; 
+        pages[currentPageIndex] = currentPage.filter(s=>s.id!==id); 
+        savePages(); renderSites(); 
     }
-  });
 }
 
-// Font Size
-fontButtons.forEach(btn=>{
-  btn.addEventListener("click",async()=>{
-    document.body.style.fontSize = btn.dataset.size + "px";
-    fontButtons.forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-    if(currentUser) await setDoc(doc(db,"users",currentUser.uid), {fontSize: btn.dataset.size}, {merge:true});
-  });
-});
+// --- Drag & Resize ---
+function enableDragResize(card,site){
+    let offsetX=0,offsetY=0,isDragging=false;
+    let startWidth=0,startHeight=0,isResizing=false;
+    const dragHandle=card.querySelector(".drag-handle");
+    const resizeHandle=card.querySelector(".resize-handle");
 
-// Background change
+    dragHandle.addEventListener("mousedown",e=>{
+        isDragging=true; offsetX=e.clientX-card.offsetLeft; offsetY=e.clientY-card.offsetTop;
+        document.body.style.userSelect="none";
+    });
+    resizeHandle.addEventListener("mousedown",e=>{
+        isResizing=true; startWidth=card.offsetWidth; startHeight=card.offsetHeight; offsetX=e.clientX; offsetY=e.clientY;
+        document.body.style.userSelect="none";
+    });
+    document.addEventListener("mousemove",e=>{
+        if(isDragging){ card.style.left=e.clientX-offsetX+"px"; card.style.top=e.clientY-offsetY+"px"; }
+        if(isResizing){ card.style.width=Math.max(100,startWidth+(e.clientX-offsetX))+"px"; card.style.height=Math.max(120,startHeight+(e.clientY-offsetY))+"px"; }
+    });
+    document.addEventListener("mouseup",()=>{
+        if(isDragging||isResizing){
+            site.left=card.style.left; site.top=card.style.top;
+            site.width=card.style.width; site.height=card.style.height;
+            savePages();
+        }
+        isDragging=false; isResizing=false; document.body.style.userSelect="auto";
+    });
+}
+
+// --- Background & Font Size ---
 changeBgBtn.addEventListener("click",async()=>{
-  const color = prompt("أدخل لون الخلفية (مثل #ffffff)"); 
-  if(!color) return; 
-  siteList.style.background=color;
-  if(currentUser){
-    await setDoc(doc(db,"users",currentUser.uid), {pageBackgrounds:{[currentPage]:color}}, {merge:true});
-  }
+    if(!currentUser){ alert("سجّل الدخول أولاً"); return; }
+    const url=prompt("ادخل رابط الخلفية:");
+    if(url){ document.body.style.background=`url(${url}) no-repeat center center fixed`; document.body.style.backgroundSize="cover"; await updateDoc(doc(db,"users",currentUser.uid),{bgUrl:url}); }
 });
-
-// Page tabs
-pageTabs.addEventListener("click",e=>{
-  if(e.target.tagName!=="BUTTON") return;
-  currentPage=e.target.dataset.page;
-  pageTabs.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
-  e.target.classList.add("active");
-  siteList.dataset.page=currentPage;
-});
-
-// Chat
-sendMsgBtn.addEventListener("click",async()=>{
-  if(!currentUser){alert("سجّل الدخول أولاً");return;}
-  const msg=chatInput.value.trim(); if(!msg)return;
-  await addDoc(collection(db,"chat"),{user:currentUser.displayName,msg,timestamp:serverTimestamp()});
-  chatInput.value="";
-});
-const chatCol=collection(db,"chat");
-onSnapshot(query(chatCol,orderBy("timestamp","asc")),snapshot=>{
-  chatBox.innerHTML="";
-  snapshot.forEach(docSnap=>{
-    const data=docSnap.data();
-    const msgDiv=document.createElement("div");
-    msgDiv.className="msg";
-    msgDiv.textContent=`${data.user||"مجهول"}: ${data.msg}`;
-    chatBox.appendChild(msgDiv);
-    chatBox.scrollTop=chatBox.scrollHeight;
-  });
-});
-
-// Emoji
-const emojis=["😀","😂","😎","😊","😢","❤️","👍","🙌","🎉"];
-function toggleEmojiPanel(){
-  emojiPanel.style.display=emojiPanel.style.display==="block"?"none":"block";
-  if(emojiPanel.innerHTML==="") emojis.forEach(e=>{
-    const span=document.createElement("span"); span.textContent=e;
-    span.onclick=()=>{chatInput.value+=e; chatInput.focus();};
-    emojiPanel.appendChild(span);
-  });
+increaseFontBtn.addEventListener("click",()=>changeFont(2));
+decreaseFontBtn.addEventListener("click",()=>changeFont(-2));
+async function changeFont(delta){
+    let currentSize=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-size'))||16;
+    currentSize+=delta; document.documentElement.style.setProperty('--font-size',currentSize+"px");
+    if(currentUser){ await updateDoc(doc(db,"users",currentUser.uid),{fontSize:currentSize}); }
 }
-document.addEventListener("click",e=>{if(!emojiPanel.contains(e.target)&&e.target.tagName!=="BUTTON") emojiPanel.style.display="none";});
+
+// --- Pages buttons ---
+addPageBtn.addEventListener("click",addPage);
+prevPageBtn.addEventListener("click",prevPage);
+nextPageBtn.addEventListener("click",nextPage);
+
+// --- Chat & Emoji ---
+sendMsgBtn.addEventListener("click",sendMessage);
+chatInput.addEventListener("keydown",e=>{if(e.key==="Enter")sendMessage();});
+function toggleEmojiPanel(){
+    emojiPanel.style.display=emojiPanel.style.display==="block"?"none":"block";
+    if(emojiPanel.childElementCount===0){ ["😀","😂","😍","😎","😢","👍","🙏","💡"].forEach(e=>{const span=document.createElement("span"); span.textContent=e; span.onclick=()=>{chatInput.value+=e;}; emojiPanel.appendChild(span);}); }
+}
+async function sendMessage(){
+    if(!currentUser){ alert("سجّل الدخول أولاً"); return; }
+    const msg=chatInput.value.trim(); if(!msg)return;
+    chatInput.value="";
+    await addDoc(collection(db,"messages"),{uid:currentUser.uid,name:currentUser.displayName,message:msg,time:serverTimestamp()});
+}
+const q=query(collection(db,"messages"),orderBy("time","asc"));
+onSnapshot(q,snap=>{chatBox.innerHTML="";snap.forEach(doc=>{const data=doc.data(); const m=document.createElement("div"); m.className="msg"; m.textContent=`${data.name||'مستخدم'}: ${data.message}`; chatBox.appendChild(m);}); chatBox.scrollTop=chatBox.scrollHeight;});
 </script>
+
 </body>
 </html>
