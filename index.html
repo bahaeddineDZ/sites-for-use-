@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>📚 مكتبتي للمواقع - BBE</title>
+  <title>📚 مكتبتي للمواقع - بهاء</title>
   <style>
     body { font-family: "Tahoma", sans-serif; background: #f4f6f9; margin: 0; padding: 0; }
     header { background: #2c3e50; color: white; padding: 15px; text-align: center; font-size: 22px; font-weight: bold; }
@@ -32,7 +32,7 @@
       <input type="text" id="siteName" placeholder="اسم الموقع">
       <input type="url" id="siteUrl" placeholder="رابط الموقع (https://)">
       <input type="text" id="siteImage" placeholder="رابط صورة (اختياري)">
-      <button onclick="handleAddSite()">➕ إضافة</button>
+      <button id="addBtn">➕ إضافة</button>
     </div>
     <div id="siteList" class="cards"></div>
   </div>
@@ -44,7 +44,7 @@
       <input type="url" id="editUrl" placeholder="الرابط">
       <input type="text" id="editImage" placeholder="رابط صورة">
       <div class="modal-buttons">
-        <button onclick="handleSaveEdit()">💾 حفظ</button>
+        <button id="saveEditBtn">💾 حفظ</button>
         <button onclick="closeModal()">❌ إلغاء</button>
       </div>
     </div>
@@ -55,7 +55,7 @@
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
     import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // ✅ Config الصحيح
+    // ✅ Config
     const firebaseConfig = {
       apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
       authDomain: "site-for-use.firebaseapp.com",
@@ -67,10 +67,12 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
+    getAnalytics(app);
     const db = getFirestore(app);
 
     const siteList = document.getElementById("siteList");
+    const addBtn = document.getElementById("addBtn");
+    const saveEditBtn = document.getElementById("saveEditBtn");
     let editId = null;
 
     // 📌 عرض المواقع بشكل لحظي
@@ -117,7 +119,7 @@
     });
 
     // ➕ إضافة موقع
-    async function handleAddSite() {
+    addBtn.addEventListener("click", async () => {
       const name = document.getElementById("siteName").value.trim();
       const url = document.getElementById("siteUrl").value.trim();
       const imageUrl = document.getElementById("siteImage").value.trim();
@@ -127,7 +129,7 @@
       await addDoc(collection(db, "sites"), { 
         name, 
         url, 
-        image: imageUrl, 
+        image: imageUrl || "https://via.placeholder.com/200x250", 
         left: "0px", 
         top: "0px", 
         width: "200px", 
@@ -137,15 +139,15 @@
       document.getElementById("siteName").value = "";
       document.getElementById("siteUrl").value = "";
       document.getElementById("siteImage").value = "";
-    }
+    });
 
     // 🗑 حذف موقع
-    async function deleteSite(id){
+    window.deleteSite = async function(id){
       await deleteDoc(doc(db,"sites",id));
     }
 
     // ✏️ تعديل موقع
-    async function openEdit(id){
+    window.openEdit = async function(id){
       editId = id;
       const docSnap = await getDoc(doc(db,"sites",id));
       const site = docSnap.data();
@@ -155,9 +157,11 @@
       document.getElementById("editModal").style.display="flex";
     }
 
-    function closeModal(){ document.getElementById("editModal").style.display="none"; }
+    window.closeModal = function(){
+      document.getElementById("editModal").style.display="none";
+    }
 
-    async function handleSaveEdit(){
+    saveEditBtn.addEventListener("click", async () => {
       const name = document.getElementById("editName").value.trim();
       const url = document.getElementById("editUrl").value.trim();
       const image = document.getElementById("editImage").value.trim();
@@ -165,7 +169,7 @@
       let data = { name, url, image };
       await updateDoc(doc(db,"sites",editId), data);
       closeModal();
-    }
+    });
 
     // 📌 حفظ الموقع بعد السحب/التكبير
     async function saveCardPosition(card, id) {
@@ -187,7 +191,10 @@
         let shiftX = e.clientX - card.getBoundingClientRect().left;
         let shiftY = e.clientY - card.getBoundingClientRect().top;
 
-        function moveAt(pageX,pageY){ card.style.left = pageX - shiftX + "px"; card.style.top = pageY - shiftY + "px"; }
+        function moveAt(pageX,pageY){ 
+          card.style.left = pageX - shiftX + "px"; 
+          card.style.top = pageY - shiftY + "px"; 
+        }
 
         function onMouseMove(ev){ moveAt(ev.pageX, ev.pageY); }
 
@@ -208,7 +215,10 @@
         function onMouseMove(ev){
           const newWidth = startWidth - (ev.clientX - startX);
           const newHeight = startHeight - (ev.clientY - startY);
-          if(newWidth>100 && newHeight>100){ card.style.width = newWidth+"px"; card.style.height = newHeight+"px"; }
+          if(newWidth>100 && newHeight>100){ 
+            card.style.width = newWidth+"px"; 
+            card.style.height = newHeight+"px"; 
+          }
         }
 
         function onMouseUp(){
@@ -220,15 +230,6 @@
         document.addEventListener("mouseup",onMouseUp,{once:true});
       });
     }
-
-    // 🔹 اختبار Firestore: إضافة وثيقة تجريبية عند تحميل الصفحة
-    addDoc(collection(db, "sites"), {
-      name: "موقع تجريبي",
-      url: "https://example.com",
-      image: "https://via.placeholder.com/200x250"
-    }).then(() => console.log("✅ تمت الإضافة بنجاح"))
-      .catch(err => console.error("❌ خطأ:", err));
-
   </script>
 </body>
 </html>
