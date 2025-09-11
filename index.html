@@ -4,29 +4,170 @@
   <meta charset="UTF-8">
   <title>📚 مكتبتي للمواقع - BBE</title>
   <style>
-    body { font-family: "Tahoma", sans-serif; background: #f4f6f9; margin: 0; padding: 0; }
-    header { background: #2c3e50; color: white; padding: 15px; text-align: center; font-size: 22px; font-weight: bold; }
-    .container { display: flex; flex-wrap: wrap; gap: 20px; padding: 20px; position: relative; }
-    .inputs { width: 100%; display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
-    input { padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; }
-    button { background: #2980b9; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 15px; transition: 0.3s; }
+    body {
+      font-family: "Tahoma", sans-serif;
+      background: linear-gradient(145deg, #f0f4f8, #d9e2ec);
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #1f3b5a;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 25px;
+      justify-content: center;
+      position: relative;
+    }
+    .inputs {
+      width: 100%;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+    input {
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      font-size: 15px;
+      flex: 1 1 200px;
+      transition: 0.3s;
+    }
+    input:focus {
+      border-color: #2980b9;
+      box-shadow: 0 0 5px rgba(41,128,185,0.5);
+      outline: none;
+    }
+    button {
+      background: #2980b9;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: 0.3s;
+    }
     button:hover { background: #1f6390; }
-    .card { position: absolute; width: 200px; height: 250px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); background: white; overflow: hidden; transition: 0.2s; }
-    .card img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
-    .card-content { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; padding: 8px; text-align: center; }
-    .actions { margin-top: 5px; }
-    .actions button { background: #c0392b; margin: 2px; }
-    .drag-handle { position: absolute; top: 5px; right: 5px; width: 20px; height: 20px; background: #2980b9; border-radius: 4px; cursor: move; }
-    .resize-handle { position: absolute; bottom: 5px; left: 5px; width: 15px; height: 15px; background: #27ae60; clip-path: polygon(0 100%, 100% 100%, 0 0); cursor: nwse-resize; }
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
-    .modal-content { background: white; padding: 20px; border-radius: 10px; width: 300px; text-align: center; }
-    .modal-content input { width: 100%; margin: 8px 0; }
-    .modal-buttons { margin-top: 15px; display: flex; justify-content: space-between; }
-    .modal-buttons button { flex: 1; margin: 0 5px; }
+
+    .card {
+      position: absolute;
+      width: 200px;
+      height: 250px;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+      background: #fff;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 20px rgba(0,0,0,0.25);
+    }
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      cursor: pointer;
+      display: block;
+    }
+    .card-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.65);
+      color: white;
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .actions {
+      margin-top: 6px;
+    }
+    .actions button {
+      background: #c0392b;
+      margin: 2px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .drag-handle {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 22px;
+      height: 22px;
+      background: #2980b9;
+      border-radius: 6px;
+      cursor: move;
+    }
+    .resize-handle {
+      position: absolute;
+      bottom: 5px;
+      left: 5px;
+      width: 18px;
+      height: 18px;
+      background: #27ae60;
+      clip-path: polygon(0 100%, 100% 100%, 0 0);
+      cursor: nwse-resize;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 25px;
+      border-radius: 15px;
+      width: 350px;
+      text-align: center;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.25);
+    }
+    .modal-content input {
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+    .modal-buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+    .modal-buttons button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
   <header>📚 مكتبتي للمواقع - بهاء</header>
+
   <div class="container">
     <div class="inputs">
       <input type="text" id="siteName" placeholder="اسم الموقع">
