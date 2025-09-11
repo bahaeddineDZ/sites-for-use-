@@ -2,114 +2,6 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>📚 مكتبتي للمواقع</title>
-  <style>
-    body { font-family: "Tahoma", sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
-    h1 { text-align: center; color: #2c3e50; }
-    form { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
-    input { padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
-    button { padding: 8px 12px; border: none; border-radius: 8px; cursor: pointer; }
-    button:hover { opacity: 0.9; }
-    #sites { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
-    .card { background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; }
-    .card img { width: 200px; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
-    .actions { margin-top: 10px; display: flex; justify-content: space-between; }
-    .edit { background: #f39c12; color: #fff; }
-    .delete { background: #e74c3c; color: #fff; }
-  </style>
-</head>
-<body>
-  <h1>📚 مكتبتي للمواقع</h1>
-
-  <form id="siteForm">
-    <input type="text" id="siteName" placeholder="اسم الموقع" required>
-    <input type="url" id="siteUrl" placeholder="رابط الموقع" required>
-    <input type="text" id="siteImage" placeholder="رابط الصورة (اختياري)">
-    <button type="submit">➕ إضافة</button>
-  </form>
-
-  <div id="sites"></div>
-
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    // 🔑 إعدادات Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
-      authDomain: "site-for-use.firebaseapp.com",
-      projectId: "site-for-use",
-      storageBucket: "site-for-use.appspot.com",
-      messagingSenderId: "44820921915",
-      appId: "1:44820921915:web:27ff432c93b013e7a2a61e",
-      measurementId: "G-LRLK1DGEX7"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const siteForm = document.getElementById("siteForm");
-    const sitesDiv = document.getElementById("sites");
-    let editId = null;
-
-    // 🟢 إضافة موقع جديد
-    siteForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = siteForm.siteName.value.trim();
-      const url = siteForm.siteUrl.value.trim();
-      const image = siteForm.siteImage.value.trim() || "https://via.placeholder.com/200x150";
-
-      if (editId) {
-        await updateDoc(doc(db, "sites", editId), { name, url, image });
-        editId = null;
-      } else {
-        await addDoc(collection(db, "sites"), { name, url, image });
-      }
-
-      siteForm.reset();
-    });
-
-    // 🔄 عرض المواقع بشكل حي
-    onSnapshot(collection(db, "sites"), (snapshot) => {
-      sitesDiv.innerHTML = "";
-      snapshot.forEach((docSnap) => {
-        const site = docSnap.data();
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <img src="${site.image}" alt="${site.name}">
-          <h3>${site.name}</h3>
-          <a href="${site.url}" target="_blank">🌐 زيارة</a>
-          <div class="actions">
-            <button class="edit">✏️ تعديل</button>
-            <button class="delete">🗑️ حذف</button>
-          </div>
-        `;
-
-        // ✏️ تعديل
-        card.querySelector(".edit").onclick = () => {
-          siteForm.siteName.value = site.name;
-          siteForm.siteUrl.value = site.url;
-          siteForm.siteImage.value = site.image;
-          editId = docSnap.id;
-        };
-
-        // 🗑️ حذف
-        card.querySelector(".delete").onclick = async () => {
-          await deleteDoc(doc(db, "sites", docSnap.id));
-        };
-
-        sitesDiv.appendChild(card);
-      });
-    });
-  </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8" />
   <title>📚 مكتبتي للمواقع - بهاء</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
@@ -129,12 +21,10 @@
     .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
     .btn.secondary{background:#fff;color:var(--accent);border:1px solid rgba(0,0,0,0.06)}
     .layout{display:flex;gap:18px;padding:18px;flex:1;align-items:flex-start}
-    /* left: board */
     .board{flex:1;min-width:320px;position:relative}
     .controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
     .controls input{padding:10px;border-radius:10px;border:1px solid #d0d7de;font-size:14px;flex:1;min-width:140px}
     .controls .add-btn{background:var(--accent);padding:10px 16px;border-radius:10px;color:#fff;border:none;cursor:pointer}
-    /* card area absolute */
     #siteList{position:relative;min-height:420px;border-radius:12px;padding:12px;background:transparent}
     .card{position:absolute;width:200px;height:250px;border-radius:12px;box-shadow:0 8px 18px rgba(0,0,0,0.12);overflow:hidden;background:var(--card);transition:transform .15s}
     .card:hover{transform:translateY(-6px)}
@@ -145,8 +35,6 @@
     .card .actions button{margin:2px;padding:6px 8px;border-radius:8px;border:none;cursor:pointer}
     .card .actions .delete{background:var(--danger);color:#fff}
     .card .actions .edit{background:#f39c12;color:#fff}
-
-    /* right: chat & list */
     .side{width:360px;max-width:40vw;display:flex;flex-direction:column;gap:12px}
     .list-panel{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);min-height:180px}
     .list-panel h3{margin:0 0 8px 0;font-size:16px;color:var(--primary)}
@@ -154,379 +42,599 @@
     .site-item{display:flex;gap:8px;align-items:center}
     .site-item img{width:48px;height:36px;object-fit:cover;border-radius:6px}
     .site-item a{color:var(--accent);text-decoration:none;display:block}
-
-    /* chat */
     .chat-panel{display:flex;flex-direction:column;gap:8px;background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06)}
     #chatBox{height:260px;overflow:auto;border-radius:8px;padding:8px;background:#fbfdff;border:1px solid #eef5fb}
-    .msg{padding:8px;border-radius:8px;margin-bottom:8px;background:#f1f6fb}
-    .msg strong{color:var(--primary)}
+    .msg{padding:8px;border-radius:15px;margin-bottom:8px;max-width:70%;word-wrap:break-word;clear:both}
+    .msg.me{background:#2980b9;color:white;float:right;border-bottom-right-radius:0}
+    .msg.other{background:#e0e0e0;color:black;float:left;border-bottom-left-radius:0}
     .chat-controls{display:flex;gap:8px;margin-top:6px}
     .chat-controls input{flex:1;padding:10px;border-radius:8px;border:1px solid #dceaf7}
-    .small{font-size:13px;color:var(--muted)}
+    .chat-controls button{padding:8px 12px;border:none;border-radius:6px;background:#2980b9;color:white;cursor:pointer}
+    .chat-controls button:hover{background:#1f5f87}
+    .emoji-panel{display:none;background:white;border:1px solid #ccc;border-radius:10px;padding:10px;margin-top:5px;max-height:120px;overflow-y:auto}
+    .emoji-panel span{cursor:pointer;font-size:20px;margin:5px}
+    #chatHint{margin-top:8px;font-size:12px;color:gray;text-align:center}
     footer{padding:10px;text-align:center;color:var(--muted);font-size:13px}
-    @media(max-width:900px){
-      .layout{flex-direction:column}
-      .side{width:100%}
-    }
+    @media(max-width:900px){.layout{flex-direction:column}.side{width:100%}}
   </style>
 </head>
 <body>
-  <header>
-    <h1>📚 مكتبتي للمواقع - بهاء</h1>
-    <div class="user-area" id="userArea">
-      <img id="userPic" class="user-pic" src="" alt="" style="display:none">
-      <div id="userName" class="small" style="display:none"></div>
-      <button id="loginBtn" class="btn">🔑 تسجيل الدخول</button>
-      <button id="logoutBtn" class="btn secondary" style="display:none">تسجيل الخروج</button>
+<header>
+  <h1>📚 مكتبتي للمواقع - بهاء</h1>
+  <div class="user-area" id="userArea">
+    <img id="userPic" class="user-pic" src="" alt="" style="display:none">
+    <div id="userName" class="small" style="display:none"></div>
+    <button id="loginBtn" class="btn">🔑 تسجيل الدخول</button>
+    <button id="logoutBtn" class="btn secondary" style="display:none">تسجيل الخروج</button>
+  </div>
+</header>
+
+<div class="layout">
+  <div class="board">
+    <div class="controls">
+      <input id="siteName" placeholder="اسم الموقع">
+      <input id="siteUrl" placeholder="رابط الموقع (https://)">
+      <input id="siteImage" placeholder="رابط صورة (اختياري)">
+      <button id="addBtn" class="add-btn">➕ إضافة</button>
     </div>
-  </header>
-
-  <div class="layout">
-    <div class="board">
-      <div class="controls">
-        <input id="siteName" placeholder="اسم الموقع">
-        <input id="siteUrl" placeholder="رابط الموقع (https://)">
-        <input id="siteImage" placeholder="رابط صورة (اختياري)">
-        <button id="addBtn" class="add-btn">➕ إضافة</button>
-      </div>
-
-      <div id="siteList" aria-live="polite"></div>
-    </div>
-
-    <div class="side">
-      <div class="list-panel">
-        <h3>قائمة المواقع</h3>
-        <div class="sites-list-short" id="sitesShort"></div>
-      </div>
-
-      <div class="chat-panel">
-        <h3>الدردشة الحية</h3>
-        <div id="chatBox"></div>
-        <div class="chat-controls">
-          <input id="chatMessage" placeholder="اكتب رسالتك..." />
-          <button id="sendMsgBtn" class="btn">📨 إرسال</button>
-        </div>
-        <div id="chatHint" class="small">سجّل الدخول لتستطيع الكتابة.</div>
-      </div>
-    </div>
+    <div id="siteList" aria-live="polite"></div>
   </div>
 
-  <footer>© مكتبتي للمواقع — BBE</footer>
+  <div class="side">
+    <div class="list-panel">
+      <h3>قائمة المواقع</h3>
+      <div class="sites-list-short" id="sitesShort"></div>
+    </div>
 
-  <!-- Firebase (modular v9) -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
-    import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    <div class="chat-panel">
+      <h3>الدردشة الحية</h3>
+      <div id="chatBox"></div>
+      <div class="chat-controls">
+        <input id="chatMessage" placeholder="اكتب رسالتك..." />
+        <button type="button" onclick="toggleEmojiPanel()">😊</button>
+        <button id="sendMsgBtn">📨</button>
+      </div>
+      <div id="emojiPanel" class="emoji-panel"></div>
+      <div id="chatHint" class="small">سجّل الدخول لتستطيع الكتابة.</div>
+    </div>
+  </div>
+</div>
 
-    // ---- CONFIG ----
-    const firebaseConfig = {
-      apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
-      authDomain: "site-for-use.firebaseapp.com",
-      projectId: "site-for-use",
-      storageBucket: "site-for-use.appspot.com",
-      messagingSenderId: "44820921915",
-      appId: "1:44820921915:web:27ff432c93b013e7a2a61e",
-      measurementId: "G-LRLK1DGEX7"
-    };
+<footer>© مكتبتي للمواقع — BBE</footer>
 
-    const app = initializeApp(firebaseConfig);
-    getAnalytics(app);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    // DOM
-    const addBtn = document.getElementById("addBtn");
-    const siteList = document.getElementById("siteList");
-    const sitesShort = document.getElementById("sitesShort");
-    const siteNameInput = document.getElementById("siteName");
-    const siteUrlInput = document.getElementById("siteUrl");
-    const siteImageInput = document.getElementById("siteImage");
+  const firebaseConfig = {
+    apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
+    authDomain: "site-for-use.firebaseapp.com",
+    projectId: "site-for-use",
+    storageBucket: "site-for-use.appspot.com",
+    messagingSenderId: "44820921915",
+    appId: "1:44820921915:web:27ff432c93b013e7a2a61e",
+    measurementId: "G-LRLK1DGEX7"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
 
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const userPic = document.getElementById("userPic");
-    const userNameEl = document.getElementById("userName");
-    const userArea = document.getElementById("userArea");
+  const addBtn = document.getElementById("addBtn");
+  const siteList = document.getElementById("siteList");
+  const sitesShort = document.getElementById("sitesShort");
+  const siteNameInput = document.getElementById("siteName");
+  const siteUrlInput = document.getElementById("siteUrl");
+  const siteImageInput = document.getElementById("siteImage");
 
-    const chatBox = document.getElementById("chatBox");
-    const chatInput = document.getElementById("chatMessage");
-    const sendMsgBtn = document.getElementById("sendMsgBtn");
-    const chatHint = document.getElementById("chatHint");
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const userPic = document.getElementById("userPic");
+  const userNameEl = document.getElementById("userName");
+  const chatBox = document.getElementById("chatBox");
+  const chatInput = document.getElementById("chatMessage");
+  const sendMsgBtn = document.getElementById("sendMsgBtn");
+  const chatHint = document.getElementById("chatHint");
 
-    let currentUser = null;
-    let editId = null;
+  let currentUser = null;
+  let editId = null;
 
-    // ---------- Authentication ----------
-    loginBtn.addEventListener("click", async () => {
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (e) {
-        alert("فشل تسجيل الدخول: " + e.message);
+  loginBtn.addEventListener("click", async () => { try { await signInWithPopup(auth, provider); } catch(e){ alert("فشل تسجيل الدخول: "+e.message); } });
+  logoutBtn.addEventListener("click", async ()=>{ await signOut(auth); });
+
+  onAuthStateChanged(auth,user=>{
+    if(user){
+      currentUser=user;
+      loginBtn.style.display="none";
+      logoutBtn.style.display="inline-block";
+      userPic.src=user.photoURL||"";
+      userPic.style.display=user.photoURL?"inline-block":"none";
+      userNameEl.textContent=user.displayName||user.email||"مستخدم";
+      userNameEl.style.display="inline-block";
+      chatHint.textContent="مسجّل الدخول — يمكنك إرسال الرسائل وإضافة المواقع.";
+    } else {
+      currentUser=null;
+      loginBtn.style.display="inline-block";
+      logoutBtn.style.display="none";
+      userPic.style.display="none";
+      userNameEl.style.display="none";
+      chatHint.textContent="سجّل الدخول لتستطيع الكتابة.";
+    }
+  });
+
+  const sitesCol = collection(db,"sites");
+  onSnapshot(sitesCol,snapshot=>{
+    siteList.innerHTML=""; sitesShort.innerHTML="";
+    snapshot.forEach(docSnap=>{
+      const site = docSnap.data(); const id = docSnap.id;
+      const card = document.createElement("div"); card.className="card";
+      card.style.left=site.left||"0px"; card.style.top=site.top||"0px";
+      card.style.width=site.width||"200px"; card.style.height=site.height||"250px";
+      const img=document.createElement("img"); img.src=site.image||"https://via.placeholder.com/200x250";
+      img.onclick=()=>window.open(site.url,"_blank");
+      const content=document.createElement("div"); content.className="card-content";
+      const title=document.createElement("div"); title.textContent=site.name;
+      const actions=document.createElement("div"); actions.className="actions";
+      const editBtn=document.createElement("button"); editBtn.className="edit"; editBtn.textContent="✏️ تعديل"; editBtn.onclick=()=>openEdit(id);
+      const deleteBtn=document.createElement("button"); deleteBtn.className="delete"; deleteBtn.textContent="🗑 حذف"; deleteBtn.onclick=()=>deleteSite(id);
+      actions.appendChild(editBtn); actions.appendChild(deleteBtn);
+      content.appendChild(title); content.appendChild(actions);
+      const dragHandle=document.createElement("div"); dragHandle.className="drag-handle";
+      const resizeHandle=document.createElement("div"); resizeHandle.className="resize-handle";
+      card.appendChild(img); card.appendChild(content); card.appendChild(dragHandle); card.appendChild(resizeHandle);
+      enableDragResize(card,id);
+      siteList.appendChild(card);
+
+      const short=document.createElement("div"); short.className="site-item";
+      short.innerHTML=`<img src="${site.image||'https://via.placeholder.com/48x36'}"><a href="${site.url}" target="_blank">${site.name}</a>`;
+      sitesShort.appendChild(short);
+    });
+  });
+
+  addBtn.addEventListener("click",async()=>{
+    const name=siteNameInput.value.trim();
+    const url=siteUrlInput.value.trim();
+    const image=siteImageInput.value.trim();
+    if(!name||!url)return alert("الرجاء تعبئة الاسم والرابط");
+    if(editId){
+      await updateDoc(doc(db,"sites",editId),{name,url,image});
+      editId=null;
+      addBtn.textContent="➕ إضافة";
+    } else {
+      await addDoc(sitesCol,{name,url,image,left:"0px",top:"0px",width:"200px",height:"250px"});
+    }
+    siteNameInput.value=""; siteUrlInput.value=""; siteImageInput.value="";
+  });
+
+  function openEdit(id){
+    getDoc(doc(db,"sites",id)).then(docSnap=>{
+      if(docSnap.exists()){
+        const data=docSnap.data();
+        siteNameInput.value=data.name||"";
+        siteUrlInput.value=data.url||"";
+        siteImageInput.value=data.image||"";
+        editId=id;
+        addBtn.textContent="💾 حفظ التعديل";
       }
     });
+  }
 
-    logoutBtn.addEventListener("click", async () => {
-      await signOut(auth);
+  async function deleteSite(id){ if(confirm("هل تريد حذف الموقع؟")) await deleteDoc(doc(db,"sites",id)); }
+
+  function enableDragResize(card,id){
+    let offsetX, offsetY, isDragging=false, isResizing=false;
+    const dragHandle = card.querySelector(".drag-handle");
+    const resizeHandle = card.querySelector(".resize-handle");
+
+    dragHandle.addEventListener("mousedown",(e)=>{
+      isDragging=true; offsetX=e.offsetX; offsetY=e.offsetY; e.preventDefault();
     });
-
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        currentUser = user;
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-        userPic.src = user.photoURL || "";
-        userPic.style.display = user.photoURL ? "inline-block" : "none";
-        userNameEl.textContent = user.displayName || user.email || "مستخدم";
-        userNameEl.style.display = "inline-block";
-        chatHint.textContent = "مسجّل الدخول — يمكنك إرسال الرسائل وإضافة المواقع.";
-      } else {
-        currentUser = null;
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
-        userPic.style.display = "none";
-        userNameEl.style.display = "none";
-        chatHint.textContent = "سجّل الدخول لتستطيع الكتابة.";
-      }
+    resizeHandle.addEventListener("mousedown",(e)=>{
+      isResizing=true; offsetX=e.offsetX; offsetY=e.offsetY; e.preventDefault();
     });
-
-    // ---------- Sites realtime (board) ----------
-    const sitesCol = collection(db, "sites");
-    onSnapshot(sitesCol, snapshot => {
-      // render board absolute cards and short list
-      siteList.innerHTML = "";
-      sitesShort.innerHTML = "";
-      snapshot.forEach(docSnap => {
-        const site = docSnap.data();
-        const id = docSnap.id;
-
-        // card
-        const card = document.createElement("div");
-        card.className = "card";
-        card.style.left = site.left || "0px";
-        card.style.top = site.top || "0px";
-        card.style.width = site.width || "200px";
-        card.style.height = site.height || "250px";
-
-        // image
-        const img = document.createElement("img");
-        img.src = site.image || "https://via.placeholder.com/200x250";
-        img.onerror = () => { img.src = "https://via.placeholder.com/200x250"; };
-        img.onclick = () => window.open(site.url, "_blank");
-
-        // content
-        const content = document.createElement("div");
-        content.className = "card-content";
-        const title = document.createElement("div");
-        title.textContent = site.name;
-        const actions = document.createElement("div");
-        actions.className = "actions";
-
-        // edit button (only show if user is owner OR allow everyone; here show always)
-        const editBtn = document.createElement("button");
-        editBtn.className = "edit";
-        editBtn.textContent = "✏️ تعديل";
-        editBtn.onclick = () => openEdit(id);
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.className = "delete";
-        deleteBtn.textContent = "🗑 حذف";
-        deleteBtn.onclick = () => deleteSite(id);
-
-        actions.appendChild(editBtn);
-        actions.appendChild(deleteBtn);
-
-        content.appendChild(title);
-        content.appendChild(actions);
-
-        // handles
-        const dragHandle = document.createElement("div");
-        dragHandle.className = "drag-handle";
-        const resizeHandle = document.createElement("div");
-        resizeHandle.className = "resize-handle";
-
-        card.appendChild(img);
-        card.appendChild(content);
-        card.appendChild(dragHandle);
-        card.appendChild(resizeHandle);
-
-        enableDragResize(card, id);
-        siteList.appendChild(card);
-
-        // short list item
-        const short = document.createElement("div");
-        short.className = "site-item";
-        short.innerHTML = `<img src="${site.image||'https://via.placeholder.com/80x60'}"><div><strong>${site.name}</strong><div class="small"><a href="${site.url}" target="_blank">${site.url}</a></div></div>`;
-        sitesShort.appendChild(short);
-      });
+    document.addEventListener("mousemove", async (e)=>{
+      if(isDragging){ card.style.left=e.pageX-offsetX+"px"; card.style.top=e.pageY-offsetY+"px"; }
+      if(isResizing){ card.style.width=(e.pageX-card.offsetLeft)+"px"; card.style.height=(e.pageY-card.offsetTop)+"px"; }
     });
-
-    // ---------- Add site (requires login) ----------
-    addBtn.addEventListener("click", async () => {
-      if (!currentUser) { alert("سجّل الدخول أولاً لإضافة مواقع"); return; }
-      const name = siteNameInput.value.trim();
-      const url = siteUrlInput.value.trim();
-      const image = siteImageInput.value.trim() || "https://via.placeholder.com/200x250";
-      if (!name || !url) { alert("من فضلك أدخل الاسم والرابط"); return; }
-
-      await addDoc(sitesCol, {
-        name, url, image,
-        left: "0px", top: "0px", width: "200px", height: "250px",
-        uid: currentUser.uid, authorName: currentUser.displayName || currentUser.email || "مستخدم",
-        createdAt: serverTimestamp()
-      });
-
-      siteNameInput.value = "";
-      siteUrlInput.value = "";
-      siteImageInput.value = "";
-    });
-
-    // ---------- Delete / Edit ----------
-    async function deleteSite(id){
-      // optional: check owner before delete (skip for now or add check)
-      await deleteDoc(doc(db, "sites", id));
-    }
-    window.deleteSite = deleteSite;
-
-    async function openEdit(id){
-      const d = await getDoc(doc(db,"sites",id));
-      const data = d.data();
-      if (!data) return alert("الوثيقة غير موجودة");
-      editId = id;
-      siteNameInput.value = data.name || "";
-      siteUrlInput.value = data.url || "";
-      siteImageInput.value = data.image || "";
-      // change add button to save if you want; but simpler: when adding while editId set -> update
-      // We'll reuse add flow: if editId present, update instead of add
-      // Replace addBtn behaviour temporarily:
-      addBtn.textContent = "💾 حفظ التعديل";
-    }
-
-    // modify addBtn behaviour to handle edit save mode
-    addBtn.addEventListener("click", async () => {
-      if (editId) {
-        // save edit
-        const name = siteNameInput.value.trim();
-        const url = siteUrlInput.value.trim();
-        const image = siteImageInput.value.trim() || "https://via.placeholder.com/200x250";
-        if (!name || !url) { alert("من فضلك أدخل الاسم والرابط"); return; }
-        await updateDoc(doc(db,"sites",editId), { name, url, image });
-        editId = null;
-        addBtn.textContent = "➕ إضافة";
-        siteNameInput.value = "";
-        siteUrlInput.value = "";
-        siteImageInput.value = "";
-        return;
-      }
-      // else normal add is already defined above; do nothing here to avoid double-add
-    }, { once: false });
-
-    // ---------- Chat ----------
-    const chatCol = collection(db, "chat");
-    const chatQuery = query(chatCol, orderBy("time"));
-    onSnapshot(chatQuery, snapshot => {
-      chatBox.innerHTML = "";
-      snapshot.forEach(docSnap => {
-        const msg = docSnap.data();
-        const id = docSnap.id;
-        const div = document.createElement("div");
-        div.className = "msg";
-        const time = msg.time && msg.time.toDate ? new Date(msg.time.toDate()).toLocaleString() : "";
-        div.innerHTML = `<strong>${escapeHtml(msg.name||"مستخدم")}</strong> <span class="small">${time}</span><div>${escapeHtml(msg.text)}</div>`;
-        // allow delete of message by owner
-        if (currentUser && msg.uid === currentUser.uid) {
-          const del = document.createElement("button");
-          del.textContent = "حذف";
-          del.style.marginTop = "6px";
-          del.style.background = "var(--danger)";
-          del.style.color = "#fff";
-          del.style.border = "none";
-          del.style.padding = "6px 8px";
-          del.style.borderRadius = "6px";
-          del.onclick = async () => { await deleteDoc(doc(db,"chat",id)); };
-          div.appendChild(del);
-        }
-        chatBox.appendChild(div);
-      });
-      chatBox.scrollTop = chatBox.scrollHeight;
-    });
-
-    sendMsgBtn.addEventListener("click", async () => {
-      if (!currentUser) { alert("سجّل الدخول أولاً لإرسال الرسائل"); return; }
-      const txt = chatInput.value.trim();
-      if (!txt) return;
-      await addDoc(chatCol, {
-        uid: currentUser.uid,
-        name: currentUser.displayName || currentUser.email || "مستخدم",
-        text: txt,
-        time: serverTimestamp()
-      });
-      chatInput.value = "";
-    });
-
-    // helper: escape HTML to avoid injection in chat
-    function escapeHtml(str){ return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
-
-    // ---------- Drag & Resize implementation ----------
-    function enableDragResize(card, id){
-      const dragHandle = card.querySelector(".drag-handle");
-      const resizeHandle = card.querySelector(".resize-handle");
-
-      // dragging
-      dragHandle.addEventListener("mousedown", (e)=>{
-        e.preventDefault();
-        let rect = card.getBoundingClientRect();
-        let shiftX = e.clientX - rect.left;
-        let shiftY = e.clientY - rect.top;
-
-        function moveAt(pageX,pageY){
-          card.style.left = pageX - shiftX + "px";
-          card.style.top = pageY - shiftY + "px";
-        }
-        function onMouseMove(ev){ moveAt(ev.pageX, ev.pageY); }
-        document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("mouseup", ()=>{ document.removeEventListener("mousemove", onMouseMove); saveCardPosition(card,id); }, { once:true });
-      });
-
-      // resizing
-      resizeHandle.addEventListener("mousedown", (e)=>{
-        e.preventDefault();
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const startW = parseInt(window.getComputedStyle(card).width,10);
-        const startH = parseInt(window.getComputedStyle(card).height,10);
-
-        function onMove(ev){
-          const newW = startW - (ev.clientX - startX);
-          const newH = startH - (ev.clientY - startY);
-          if (newW > 100 && newH > 100){
-            card.style.width = newW + "px";
-            card.style.height = newH + "px";
-          }
-        }
-        function onUp(){ document.removeEventListener("mousemove", onMove); saveCardPosition(card,id); }
-        document.addEventListener("mousemove", onMove);
-        document.addEventListener("mouseup", onUp, { once:true });
-      });
-    }
-
-    async function saveCardPosition(card, id){
-      try {
-        await updateDoc(doc(db,"sites",id), {
-          left: card.style.left,
-          top: card.style.top,
-          width: card.style.width,
-          height: card.style.height
+    document.addEventListener("mouseup", async ()=>{
+      if(isDragging||isResizing){ 
+        isDragging=isResizing=false;
+        await updateDoc(doc(db,"sites",id),{
+          left:card.style.left, top:card.style.top,
+          width:card.style.width, height:card.style.height
         });
-      } catch (e) { console.error("Failed to save position:", e); }
-    }
+      }
+    });
+  }
 
-    // small UX: allow Enter to send chat
-    chatInput.addEventListener("keydown", (e)=>{ if (e.key === "Enter") { e.preventDefault(); sendMsgBtn.click(); } });
+  // Chat
+  const chatCol = collection(db,"chat");
+  const q = query(chatCol, orderBy("timestamp","asc"));
+  onSnapshot(q,snap=>{
+    chatBox.innerHTML="";
+    snap.forEach(d=>{
+      const data=d.data();
+      const msgEl=document.createElement("div");
+      msgEl.className="msg "+(data.uid===currentUser?.uid?"me":"other");
+      msgEl.textContent=data.name+": "+data.message;
+      chatBox.appendChild(msgEl);
+    });
+    chatBox.scrollTop=chatBox.scrollHeight;
+  });
 
-    // end module
-  </script>
-</body>
-</html>
+  sendMsgBtn.addEventListener("click",sendChat);
+  chatInput.addEventListener("keydown",e=>{if(e.key==="Enter")sendChat();});
+
+  async function sendChat(){
+    if(!currentUser){ alert("سجّل الدخول أولا"); return; }
+    const message=chatInput.value.trim(); if(!message) return;
+    await addDoc(chatCol,{name:currentUser.displayName||"مستخدم",uid:currentUser.uid,message,timestamp:serverTimestamp()});
+    chatInput.value="";
+  }
+
+  // Emoji
+  const emojiPanel = document.getElementById("emojiPanel");
+  const emojis = ["😀","😂","😍","😎","🤔","🙌","👍","🎉","💡","❤️"];
+  emojis.forEach(e=>{const sp=document.createElement("span");sp.textContent=e;sp.onclick=()=>{chatInput.value+=e;chatInput.focus();};emojiPanel.appendChild(sp);});
+  window.toggleEmojiPanel=()=>{emojiPanel.style.display=emojiPanel.style.display==="block"?"none":"block";};
+</script>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📚 مكتبتي للمواقع - بهاء</title>
+<style>
+/* ===================== */
+/* المتغيرات العامة */
+:root {
+  --primary: #2c3e50;
+  --accent: #2980b9;
+  --danger: #e74c3c;
+  --muted: #7f8c8d;
+  --card: #ffffff;
+}
+
+/* ===================== */
+/* إعدادات عامة للجسم والعناصر */
+* { box-sizing: border-box; }
+body {
+  font-family: Tahoma, Arial, sans-serif;
+  background: linear-gradient(180deg,#eef6fb,#f4f6f9);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===================== */
+/* الهيدر */
+header {
+  background: var(--primary);
+  color: #fff;
+  padding: 14px 18px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+header h1 { font-size: 18px; margin: 0; }
+.user-area { display: flex; align-items: center; gap: 10px; }
+.user-pic { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.2); }
+.btn { background: var(--accent); color: #fff; padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer; }
+.btn.secondary { background: #fff; color: var(--accent); border: 1px solid rgba(0,0,0,0.06); }
+
+/* ===================== */
+/* التصميم الرئيسي */
+.layout {
+  display: flex;
+  gap: 18px;
+  padding: 18px;
+  flex: 1;
+  align-items: flex-start;
+}
+
+/* ===================== */
+/* اللوحة اليسرى - Board */
+.board { flex: 1; min-width: 320px; position: relative; }
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.controls input {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #d0d7de;
+  font-size: 14px;
+  flex: 1;
+  min-width: 140px;
+}
+.controls .add-btn {
+  background: var(--accent);
+  padding: 10px 16px;
+  border-radius: 10px;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+#siteList {
+  position: relative;
+  min-height: 420px;
+  border-radius: 12px;
+  padding: 12px;
+  background: transparent;
+}
+
+/* ===================== */
+/* البطاقات */
+.card {
+  position: absolute;
+  width: 200px;
+  height: 250px;
+  border-radius: 12px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+  overflow: hidden;
+  background: var(--card);
+  transition: transform .15s;
+}
+.card:hover { transform: translateY(-6px); }
+.card img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }
+.card-content {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  padding: 8px;
+  text-align: center;
+}
+.card-content h3 { margin: 0; font-size: 14px; }
+.card .drag-handle {
+  position: absolute; top: 6px; right: 6px;
+  width: 22px; height: 22px; background: var(--accent);
+  border-radius: 6px; cursor: move;
+}
+.card .resize-handle {
+  position: absolute; left: 6px; bottom: 6px;
+  width: 16px; height: 16px; background: #2ecc71;
+  clip-path: polygon(0 100%,100% 100%,0 0);
+  cursor: nwse-resize;
+}
+.card .actions button {
+  margin: 2px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+.card .actions .delete { background: var(--danger); color: #fff; }
+.card .actions .edit { background: #f39c12; color: #fff; }
+
+/* ===================== */
+/* اللوحة اليمنى - Side */
+.side { width: 360px; max-width: 40vw; display: flex; flex-direction: column; gap: 12px; }
+
+/* ===================== */
+/* قائمة المواقع المختصرة */
+.list-panel {
+  background: var(--card);
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+  min-height: 180px;
+}
+.list-panel h3 { margin: 0 0 8px 0; font-size: 16px; color: var(--primary); }
+.sites-list-short {
+  display: flex; flex-direction: column; gap: 8px;
+  max-height: 160px;
+  overflow: auto;
+}
+.site-item { display: flex; gap: 8px; align-items: center; }
+.site-item img { width: 48px; height: 36px; object-fit: cover; border-radius: 6px; }
+.site-item a { color: var(--accent); text-decoration: none; display: block; }
+
+/* ===================== */
+/* لوحة الدردشة */
+.chat-panel {
+  display: flex; flex-direction: column; gap: 8px;
+  background: var(--card);
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+}
+#chatBox {
+  height: 260px;
+  overflow: auto;
+  border-radius: 8px;
+  padding: 8px;
+  background: #fbfdff;
+  border: 1px solid #eef5fb;
+}
+.msg {
+  display: inline-block;
+  padding: 8px 12px;
+  margin: 5px 0;
+  border-radius: 15px;
+  max-width: 70%;
+  clear: both;
+  word-wrap: break-word;
+}
+.msg.me { background: #2980b9; color: #fff; float: right; border-bottom-right-radius: 0; }
+.msg.other { background: #e0e0e0; color: black; float: left; border-bottom-left-radius: 0; }
+.chat-controls { display: flex; gap: 5px; margin-top: 6px; }
+.chat-controls input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+.chat-controls button { padding: 8px 12px; border: none; border-radius: 6px; background: #2980b9; color: white; cursor: pointer; }
+.chat-controls button:hover { background: #1f5f87; }
+
+/* ===================== */
+/* نافذة الإيموجي */
+.emoji-panel {
+  display: none;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 5px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.emoji-panel span {
+  cursor: pointer;
+  font-size: 20px;
+  margin: 5px;
+}
+
+/* ===================== */
+/* ملاحظات */
+#chatHint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: gray;
+  text-align: center;
+}
+
+/* ===================== */
+/* Footer */
+footer {
+  padding: 10px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ===================== */
+/* Responsive */
+@media(max-width:900px) {
+  .layout { flex-direction: column; }
+  .side { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📚 مكتبتي للمواقع - بهاء</h1>
+  <div class="user-area" id="userArea">
+    <img id="userPic" class="user-pic" src="" alt="" style="display:none">
+    <div id="userName" class="small" style="display:none"></div>
+    <button id="loginBtn" class="btn">🔑 تسجيل الدخول</button>
+    <button id="logoutBtn" class="btn secondary" style="display:none">تسجيل الخروج</button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- لوحة المواقع -->
+  <div class="board">
+    <div class="controls">
+      <input id="siteName" placeholder="اسم الموقع">
+      <input id="siteUrl" placeholder="رابط الموقع (https://)">
+      <input id="siteImage" placeholder="رابط صورة (اختياري)">
+      <button id="addBtn" class="add-btn">➕ إضافة</button>
+    </div>
+    <div id="siteList" aria-live="polite"></div>
+  </div>
+
+  <!-- اللوحة الجانبية -->
+  <div class="side">
+    <div class="list-panel">
+      <h3>قائمة المواقع</h3>
+      <div class="sites-list-short" id="sitesShort"></div>
+    </div>
+
+    <div class="chat-panel">
+      <h3>الدردشة الحية</h3>
+      <div id="chatBox"></div>
+
+      <div class="chat-controls">
+        <input id="chatMessage" placeholder="اكتب رسالتك..." />
+        <button type="button" onclick="toggleEmojiPanel()">😊</button>
+        <button id="sendMsgBtn" onclick="sendMessage()">📨</button>
+      </div>
+
+      <div id="emojiPanel" class="emoji-panel"></div>
+      <div id="chatHint" class="small">سجّل الدخول لتستطيع الكتابة.</div>
+    </div>
+  </div>
+</div>
+
+<footer>© مكتبتي للمواقع — BBE</footer>
+
+<script type="module">
+// =====================
+// Firebase imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// =====================
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
+  authDomain: "site-for-use.firebaseapp.com",
+  projectId: "site-for-use",
+  storageBucket: "site-for-use.appspot.com",
+  messagingSenderId: "44820921915",
+  appId: "1:44820921915:web:27ff432c93b013e7a2a61e",
+  measurementId: "G-LRLK1DGEX7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+// =====================
+// DOM Elements
+const addBtn = document.getElementById("addBtn");
+const siteList = document.getElementById("siteList");
+const sitesShort = document.getElementById("sitesShort");
+const siteNameInput = document.getElementById("siteName");
+const siteUrlInput = document.getElementById("siteUrl");
+const siteImageInput = document.getElementById("siteImage");
+
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const userPic = document.getElementById("userPic");
+const userNameEl = document.getElementById("userName");
+
+const chatBox = document.getElementById("chatBox");
+const chatInput = document.getElementById("chatMessage");
+const sendMsgBtn = document.getElementById("sendMsgBtn");
+const chatHint = document.getElementById("chatHint");
+
+let currentUser = null;
+let editId = null;
+
+// =====================
+// Authentication
+loginBtn.addEventListener("click", async () => {
+  try { await signInWithPopup(auth, provider); } 
+  catch(e) { alert("فشل تسجيل الدخول: " + e.message); }
+});
+logoutBtn.addEventListener("click", async () => { await signOut(auth); });
+
+onAuthStateChanged(auth, user => {
+  if(user){
+    currentUser = user;
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "inline-block";
+    userPic.src = user.photoURL || "";
+    userPic.style.display = user.photoURL ? "inline-block" : "none";
+    userNameEl.textContent = user.displayName || user.email || "مستخدم";
+    userNameEl.style.display = "inline-block";
+    chatHint.textContent = "مسجّل الدخول — يمكنك إرسال الرسائل وإضافة المواقع.";
+  } else {
+    currentUser = null;
+    loginBtn.style.display = "inline-block";
+    logoutBtn.style.display = "none";
+    userPic.style.display = "none";
+    userNameEl.style.display = "none";
+    chatHint.textContent = "سجّل الدخول لتستطيع الكتابة.";
+  }
+});
+
+// =====================
+//
