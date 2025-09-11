@@ -115,7 +115,7 @@ footer{padding:10px;text-align:center;color:var(--muted);font-size:13px;}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, setDoc, onSnapshot, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = { /* إعدادات Firebase الخاصة بك هنا */ };
@@ -165,28 +165,29 @@ onAuthStateChanged(auth, async user=>{
     chatHint.textContent=user?"مسجّل الدخول — يمكنك إرسال الرسائل وإضافة المواقع.":"سجّل الدخول لتستطيع الكتابة.";
 
     if(user){
-        const userDoc = await getDoc(doc(db,"users",user.uid));
+        const userDocRef = doc(db,"users",user.uid);
+        const userDoc = await getDoc(userDocRef);
         if(userDoc.exists()){
             const data=userDoc.data();
             if(data.bgUrl){ document.body.style.background = `url(${data.bgUrl}) no-repeat center center fixed`; document.body.style.backgroundSize="cover"; }
             if(data.fontSize){ document.documentElement.style.setProperty('--font-size', data.fontSize+'px'); }
+            pages = Array.isArray(data.pages)? data.pages : [[]];
+        } else {
+            pages = [[]];
+            await setDoc(userDocRef, {pages}, {merge:true});
         }
-    }else{ document.body.style.background="linear-gradient(180deg,#eef6fb,#f4f6f9)"; }
-    loadPages();
+        if(currentPageIndex>=pages.length) currentPageIndex=pages.length-1;
+        renderSites();
+    }else{
+        document.body.style.background="linear-gradient(180deg,#eef6fb,#f4f6f9)";
+    }
 });
 
 // --- Pages ---
-async function loadPages(){
-    if(!currentUser) return;
-    const pagesSnap = await getDoc(doc(db,"users",currentUser.uid));
-    if(pagesSnap.exists()){ const data=pagesSnap.data(); pages=data.pages||[[]]; } else { pages=[[]]; }
-    if(currentPageIndex>=pages.length) currentPageIndex=pages.length-1;
-    renderSites();
-}
 function addPage(){ pages.push([]); currentPageIndex=pages.length-1; savePages(); renderSites(); }
 function prevPage(){ if(currentPageIndex>0){ currentPageIndex--; renderSites(); } }
 function nextPage(){ if(currentPageIndex<pages.length-1){ currentPageIndex++; renderSites(); } }
-async function savePages(){ if(!currentUser) return; await updateDoc(doc(db,"users",currentUser.uid),{pages}); }
+async function savePages(){ if(!currentUser) return; await setDoc(doc(db,"users",currentUser.uid), {pages}, {merge:true}); }
 
 // --- Sites rendering ---
 function renderSites(){
@@ -268,46 +269,42 @@ function enableDragResize(card,site){
         if(isDragging||isResizing){
             site.left=card.style.left; site.top=card.style.top;
             site.width=card.style.width; site.height=card.style.height;
-            savePages();
+            savePages(); isDragging=false; isResizing=false; document.body.style.userSelect="auto";
         }
-        isDragging=false; isResizing=false; document.body.style.userSelect="auto";
     });
 }
 
-// --- Background & Font Size ---
-changeBgBtn.addEventListener("click",async()=>{
-    if(!currentUser){ alert("سجّل الدخول أولاً"); return; }
-    const url=prompt("ادخل رابط الخلفية:");
-    if(url){ document.body.style.background=`url(${url}) no-repeat center center fixed`; document.body.style.backgroundSize="cover"; await updateDoc(doc(db,"users",currentUser.uid),{bgUrl:url}); }
+// --- Page buttons ---
+addPageBtn.addEventListener("click", addPage);
+prevPageBtn.addEventListener("click", prevPage);
+nextPageBtn.addEventListener("click", nextPage);
+
+// --- Font size ---
+increaseFontBtn.addEventListener("click",()=>{ 
+    let size=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-size'));
+    size+=2; document.documentElement.style.setProperty('--font-size',size+'px'); 
+    if(currentUser) setDoc(doc(db,"users",currentUser.uid), {fontSize:size}, {merge:true});
 });
-increaseFontBtn.addEventListener("click",()=>changeFont(2));
-decreaseFontBtn.addEventListener("click",()=>changeFont(-2));
-async function changeFont(delta){
-    let currentSize=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-size'))||16;
-    currentSize+=delta; document.documentElement.style.setProperty('--font-size',currentSize+"px");
-    if(currentUser){ await updateDoc(doc(db,"users",currentUser.uid),{fontSize:currentSize}); }
-}
+decreaseFontBtn.addEventListener("click",()=>{ 
+    let size=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--font-size'));
+    size=Math.max(10,size-2); document.documentElement.style.setProperty('--font-size',size+'px'); 
+    if(currentUser) setDoc(doc(db,"users",currentUser.uid), {fontSize:size}, {merge:true});
+});
 
-// --- Pages buttons ---
-addPageBtn.addEventListener("click",addPage);
-prevPageBtn.addEventListener("click",prevPage);
-nextPageBtn.addEventListener("click",nextPage);
+// --- Background ---
+changeBgBtn.addEventListener("click",()=>{
+    const url=prompt("ادخل رابط الخلفية:"); if(url){ document.body.style.background=`url(${url}) no-repeat center center fixed`; document.body.style.backgroundSize="cover";
+    if(currentUser) setDoc(doc(db,"users",currentUser.uid), {bgUrl:url}, {merge:true}); }
+});
 
-// --- Chat & Emoji ---
-sendMsgBtn.addEventListener("click",sendMessage);
-chatInput.addEventListener("keydown",e=>{if(e.key==="Enter")sendMessage();});
-function toggleEmojiPanel(){
-    emojiPanel.style.display=emojiPanel.style.display==="block"?"none":"block";
-    if(emojiPanel.childElementCount===0){ ["😀","😂","😍","😎","😢","👍","🙏","💡"].forEach(e=>{const span=document.createElement("span"); span.textContent=e; span.onclick=()=>{chatInput.value+=e;}; emojiPanel.appendChild(span);}); }
-}
-async function sendMessage(){
-    if(!currentUser){ alert("سجّل الدخول أولاً"); return; }
-    const msg=chatInput.value.trim(); if(!msg)return;
-    chatInput.value="";
-    await addDoc(collection(db,"messages"),{uid:currentUser.uid,name:currentUser.displayName,message:msg,time:serverTimestamp()});
-}
-const q=query(collection(db,"messages"),orderBy("time","asc"));
-onSnapshot(q,snap=>{chatBox.innerHTML="";snap.forEach(doc=>{const data=doc.data(); const m=document.createElement("div"); m.className="msg"; m.textContent=`${data.name||'مستخدم'}: ${data.message}`; chatBox.appendChild(m);}); chatBox.scrollTop=chatBox.scrollHeight;});
+// --- Chat ---
+function toggleEmojiPanel(){ emojiPanel.style.display = emojiPanel.style.display==="block"?"none":"block"; }
+const emojis = ["😀","😂","😍","🥰","😎","👍","🎉","💡","🔥","💬"];
+emojis.forEach(e=>{ const span=document.createElement("span"); span.textContent=e; span.onclick=()=>{ chatInput.value+=e; }; emojiPanel.appendChild(span); });
+sendMsgBtn.addEventListener("click",()=>{ const msg=chatInput.value.trim(); if(!msg||!currentUser) return; const chatRef = collection(db,"chats"); addDoc(chatRef,{uid:currentUser.uid,name:currentUser.displayName,text:msg,time:Date.now()}); chatInput.value=""; });
+onSnapshot(query(collection(db,"chats"), orderBy("time")), snapshot=>{
+    chatBox.innerHTML=""; snapshot.docs.forEach(d=>{ const data=d.data(); const div=document.createElement("div"); div.className="msg"; div.textContent=`${data.name}: ${data.text}`; chatBox.appendChild(div); }); chatBox.scrollTop=chatBox.scrollHeight;
+});
 </script>
 
 </body>
