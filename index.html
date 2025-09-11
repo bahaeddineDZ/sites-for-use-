@@ -262,12 +262,28 @@ const text=chatInput.value.trim(); if(!text) return;
 addDoc(chatCol,{text,uid:currentUser.uid,timestamp:serverTimestamp()}); chatInput.value="";}
 
 // Emoji
-const emojiPanel=document.getElementById("emojiPanel");
-function toggleEmojiPanel(){
-emojiPanel.style.display=emojiPanel.style.display==="block"?"none":"block";
-if(emojiPanel.innerHTML===""){const emojis="😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤐 🤨 😐 😑 😶 😏".split(" ");
-emojis.forEach(e=>{const span=document.createElement("span"); span.textContent=e; span.onclick=()=>{chatInput.value+=e;}; emojiPanel.appendChild(span);});}
+// Emoji
+const emojiPanel = document.getElementById("emojiPanel");
+function toggleEmojiPanel() {
+  emojiPanel.style.display = emojiPanel.style.display === "block" ? "none" : "block";
+
+  if (!emojiPanel.hasChildNodes()) {
+    const emojis = "😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤐 🤨 😐 😑 😶 😏".split(" ");
+    emojis.forEach(e => {
+      const span = document.createElement("span");
+      span.textContent = e;
+      span.style.cursor = "pointer";
+      span.style.margin = "3px";
+      span.style.fontSize = "20px";
+      span.addEventListener("click", () => {
+        chatInput.value += e; // إضافة الإيموجي للنص
+        chatInput.focus();    // تركيز المؤشر في مربع الدردشة
+      });
+      emojiPanel.appendChild(span);
+    });
+  }
 }
+
 </script>
 
 </body>
