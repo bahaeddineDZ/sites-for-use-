@@ -43,16 +43,14 @@ header h1{margin:0;font-size:18px;}
 .site-item{display:flex;gap:8px;align-items:center;}
 .site-item img{width:48px;height:36px;object-fit:cover;border-radius:6px;}
 .site-item a{color:var(--accent);text-decoration:none;display:block;}
-.chat-panel{display:flex;flex-direction:column;gap:8px;background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);}
+.chat-panel{display:flex;flex-direction:column;gap:8px;background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);position:relative;}
 #chatBox{height:260px;overflow:auto;border-radius:8px;padding:8px;background:#fbfdff;border:1px solid #eef5fb;}
 .msg{display:inline-block;padding:8px 12px;margin:5px 0;border-radius:15px;max-width:70%;clear:both;word-wrap:break-word;}
-.msg.me{background:#2980b9;color:#fff;float:right;border-bottom-right-radius:0;}
-.msg.other{background:#e0e0e0;color:black;float:left;border-bottom-left-radius:0;}
-.chat-controls{display:flex;gap:5px;margin-top:6px;}
+.chat-controls{display:flex;gap:5px;margin-top:6px;position:relative;}
 .chat-controls input{flex:1;padding:8px;border:1px solid #ccc;border-radius:6px;}
 .chat-controls button{padding:8px 12px;border:none;border-radius:6px;background:#2980b9;color:white;cursor:pointer;}
 .chat-controls button:hover{background:#1f5f87;}
-.emoji-panel{display:none;background:white;border:1px solid #ccc;border-radius:10px;padding:10px;margin-top:5px;max-height:120px;overflow-y:auto;}
+.emoji-panel{display:none;background:white;border:1px solid #ccc;border-radius:10px;padding:10px;max-height:120px;overflow-y:auto;position:absolute;bottom:60px;right:10px;z-index:1000;box-shadow:0 6px 12px rgba(0,0,0,0.15);transition:all 0.2s ease;}
 .emoji-panel span{cursor:pointer;font-size:20px;margin:5px;}
 #chatHint{margin-top:8px;font-size:12px;color:gray;text-align:center;}
 footer{padding:10px;text-align:center;color:var(--muted);font-size:13px;}
@@ -140,6 +138,7 @@ const chatBox=document.getElementById("chatBox");
 const chatInput=document.getElementById("chatMessage");
 const sendMsgBtn=document.getElementById("sendMsgBtn");
 const chatHint=document.getElementById("chatHint");
+const emojiPanel = document.getElementById("emojiPanel");
 
 let currentUser=null;
 let editId=null;
@@ -248,42 +247,79 @@ const chatCol=collection(db,"chat");
 onSnapshot(query(chatCol,orderBy("timestamp")),snapshot=>{
 chatBox.innerHTML="";
 snapshot.forEach(docSnap=>{
-const msg=docSnap.data(); const div=document.createElement("div");
+const msg=docSnap.data(); 
+const div=document.createElement("div");
 div.className="msg "+(msg.uid===currentUser?.uid?"me":"other");
-div.textContent=msg.text; chatBox.appendChild(div);
+
+// User info
+const userInfo = document.createElement("div");
+userInfo.style.display = "flex"; userInfo.style.alignItems = "center"; userInfo.style.gap = "6px"; userInfo.style.marginBottom = "2px";
+const img = document.createElement("img");
+img.src = msg.photoURL || "https://via.placeholder.com/24";
+img.style.width = "24px"; img.style.height = "24px"; img.style.borderRadius = "50%"; img.style.objectFit = "cover";
+const name = document.createElement("span");
+name.textContent = msg.displayName || "مستخدم";
+name.style.fontSize = "12px"; name.style.color = msg.uid===currentUser?.uid?"#fff":"#555";
+userInfo.appendChild(img); userInfo.appendChild(name);
+
+const textDiv = document.createElement("div");
+textDiv.textContent = msg.text;
+
+div.innerHTML = "";
+div.appendChild(userInfo);
+div.appendChild(textDiv);
+
+div.style.maxWidth="70%";
+div.style.marginBottom="6px";
+div.style.clear="both";
+div.style.padding="6px 10px";
+div.style.borderRadius="12px";
+div.style.wordWrap="break-word";
+div.style.background = msg.uid===currentUser?.uid?"#2980b9":"#e0e0e0";
+div.style.color = msg.uid===currentUser?.uid?"#fff":"#000";
+div.style.float = msg.uid===currentUser?.uid?"right":"left";
+
+chatBox.appendChild(div);
 chatBox.scrollTop=chatBox.scrollHeight;
 });
 });
 
 sendMsgBtn.addEventListener("click",sendMsg);
 chatInput.addEventListener("keypress",e=>{if(e.key==="Enter")sendMsg();});
-function sendMsg(){if(!currentUser){alert("سجّل الدخول أولاً"); return;}
+function sendMsg(){
+if(!currentUser){alert("سجّل الدخول أولاً"); return;}
 const text=chatInput.value.trim(); if(!text) return;
-addDoc(chatCol,{text,uid:currentUser.uid,timestamp:serverTimestamp()}); chatInput.value="";}
-
-// Emoji
-// Emoji
-const emojiPanel = document.getElementById("emojiPanel");
-function toggleEmojiPanel() {
-  emojiPanel.style.display = emojiPanel.style.display === "block" ? "none" : "block";
-
-  if (!emojiPanel.hasChildNodes()) {
-    const emojis = "😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤐 🤨 😐 😑 😶 😏".split(" ");
-    emojis.forEach(e => {
-      const span = document.createElement("span");
-      span.textContent = e;
-      span.style.cursor = "pointer";
-      span.style.margin = "3px";
-      span.style.fontSize = "20px";
-      span.addEventListener("click", () => {
-        chatInput.value += e; // إضافة الإيموجي للنص
-        chatInput.focus();    // تركيز المؤشر في مربع الدردشة
-      });
-      emojiPanel.appendChild(span);
-    });
-  }
+addDoc(chatCol,{
+text,
+uid:currentUser.uid,
+displayName: currentUser.displayName,
+photoURL: currentUser.photoURL,
+timestamp: serverTimestamp()
+});
+chatInput.value="";
 }
 
+// Emoji panel
+function toggleEmojiPanel() {
+if(emojiPanel.style.display==="block"){emojiPanel.style.display="none";}
+else{
+emojiPanel.style.display="block";
+if (!emojiPanel.hasChildNodes()) {
+const emojis = "😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤐 🤨 😐 😑 😶 😏".split(" ");
+emojis.forEach(e => {
+const span = document.createElement("span"); span.textContent = e;
+span.addEventListener("click", () => {chatInput.value += e; chatInput.focus();});
+emojiPanel.appendChild(span);
+});
+}
+}
+}
+// Close emoji panel if click outside
+document.addEventListener("click", function(e){
+if(!emojiPanel.contains(e.target) && e.target.id!=="chatMessage" && e.target.textContent!=="😊"){
+emojiPanel.style.display="none";
+}
+});
 </script>
 
 </body>
