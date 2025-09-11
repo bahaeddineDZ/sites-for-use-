@@ -31,7 +31,7 @@
     <div class="inputs">
       <input type="text" id="siteName" placeholder="اسم الموقع">
       <input type="url" id="siteUrl" placeholder="رابط الموقع (https://)">
-      <input type="url" id="siteImage" placeholder="رابط صورة الموقع">
+      <input type="text" id="siteImage" placeholder="رابط صورة (اختياري)">
       <button onclick="handleAddSite()">➕ إضافة</button>
     </div>
     <div id="siteList" class="cards"></div>
@@ -42,7 +42,7 @@
       <h3>✏️ تعديل الموقع</h3>
       <input type="text" id="editName" placeholder="اسم الموقع">
       <input type="url" id="editUrl" placeholder="الرابط">
-      <input type="url" id="editImage" placeholder="رابط صورة الموقع">
+      <input type="text" id="editImage" placeholder="رابط صورة">
       <div class="modal-buttons">
         <button onclick="handleSaveEdit()">💾 حفظ</button>
         <button onclick="closeModal()">❌ إلغاء</button>
@@ -50,11 +50,12 @@
     </div>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
+    import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-  <script>
+    // ✅ Config الصحيح
     const firebaseConfig = {
       apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
       authDomain: "site-for-use.firebaseapp.com",
@@ -65,14 +66,15 @@
       measurementId: "G-LRLK1DGEX7"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
 
     const siteList = document.getElementById("siteList");
     let editId = null;
 
-    // التحديث اللحظي
-    db.collection("sites").onSnapshot(snapshot => {
+    // 📌 عرض المواقع بشكل لحظي
+    onSnapshot(collection(db, "sites"), snapshot => {
       siteList.innerHTML = "";
       snapshot.forEach(docSnap => {
         const site = docSnap.data();
@@ -99,6 +101,7 @@
 
         const dragHandle = document.createElement("div");
         dragHandle.className = "drag-handle";
+
         const resizeHandle = document.createElement("div");
         resizeHandle.className = "resize-handle";
 
@@ -108,26 +111,27 @@
         card.appendChild(resizeHandle);
 
         enableDragResize(card, id);
+
         siteList.appendChild(card);
       });
     });
 
-    // إضافة موقع
+    // ➕ إضافة موقع
     async function handleAddSite() {
       const name = document.getElementById("siteName").value.trim();
       const url = document.getElementById("siteUrl").value.trim();
-      const image = document.getElementById("siteImage").value.trim();
+      const imageUrl = document.getElementById("siteImage").value.trim();
 
-      if(!name || !url) return alert("من فضلك أدخل الاسم والرابط");
+      if (!name || !url) return alert("من فضلك أدخل الاسم والرابط");
 
-      await db.collection("sites").add({
-        name,
-        url,
-        image,
-        left: "0px",
-        top: "0px",
-        width: "200px",
-        height: "250px"
+      await addDoc(collection(db, "sites"), { 
+        name, 
+        url, 
+        image: imageUrl, 
+        left: "0px", 
+        top: "0px", 
+        width: "200px", 
+        height: "250px" 
       });
 
       document.getElementById("siteName").value = "";
@@ -135,19 +139,19 @@
       document.getElementById("siteImage").value = "";
     }
 
-    // حذف موقع
+    // 🗑 حذف موقع
     async function deleteSite(id){
-      await db.collection("sites").doc(id).delete();
+      await deleteDoc(doc(db,"sites",id));
     }
 
-    // تعديل موقع
+    // ✏️ تعديل موقع
     async function openEdit(id){
       editId = id;
-      const docSnap = await db.collection("sites").doc(id).get();
+      const docSnap = await getDoc(doc(db,"sites",id));
       const site = docSnap.data();
       document.getElementById("editName").value = site.name;
       document.getElementById("editUrl").value = site.url;
-      document.getElementById("editImage").value = site.image;
+      document.getElementById("editImage").value = site.image || "";
       document.getElementById("editModal").style.display="flex";
     }
 
@@ -158,15 +162,14 @@
       const url = document.getElementById("editUrl").value.trim();
       const image = document.getElementById("editImage").value.trim();
 
-      await db.collection("sites").doc(editId).update({
-        name, url, image
-      });
+      let data = { name, url, image };
+      await updateDoc(doc(db,"sites",editId), data);
       closeModal();
     }
 
-    // حفظ موقع وحجمه بعد السحب أو التكبير
+    // 📌 حفظ الموقع بعد السحب/التكبير
     async function saveCardPosition(card, id) {
-      await db.collection("sites").doc(id).update({
+      await updateDoc(doc(db,"sites",id), {
         left: card.style.left,
         top: card.style.top,
         width: card.style.width,
@@ -174,7 +177,7 @@
       });
     }
 
-    // دوال السحب والتكبير
+    // 🖱 السحب والتكبير
     function enableDragResize(card, id){
       const dragHandle = card.querySelector(".drag-handle");
       const resizeHandle = card.querySelector(".resize-handle");
