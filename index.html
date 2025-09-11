@@ -13,7 +13,7 @@
   --card:#ffffff;
 }
 *{box-sizing:border-box;}
-body{font-family:Tahoma, Arial, sans-serif;margin:0;padding:0;min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#eef6fb,#f4f6f9);}
+body{font-family:Tahoma, Arial, sans-serif;margin:0;padding:0;min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#eef6fb,#f4f6f9);transition:background 0.3s;}
 header{background:var(--primary);color:#fff;padding:14px 18px;display:flex;gap:12px;align-items:center;justify-content:space-between;}
 header h1{margin:0;font-size:18px;}
 .user-area{display:flex;align-items:center;gap:10px;}
@@ -54,6 +54,10 @@ header h1{margin:0;font-size:18px;}
 .emoji-panel span{cursor:pointer;font-size:20px;margin:5px;}
 #chatHint{margin-top:8px;font-size:12px;color:gray;text-align:center;}
 footer{padding:10px;text-align:center;color:var(--muted);font-size:13px;}
+.bg-controls{margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap;}
+.bg-controls input[type=color]{cursor:pointer;width:40px;height:40px;border:none;border-radius:6px;padding:0;}
+.bg-controls input[type=text]{flex:1;padding:6px;border-radius:6px;border:1px solid #ccc;}
+.bg-controls button{padding:6px 12px;border:none;border-radius:6px;background:#2980b9;color:#fff;cursor:pointer;}
 @media(max-width:900px){.layout{flex-direction:column}.side{width:100%;}}
 </style>
 </head>
@@ -71,6 +75,11 @@ footer{padding:10px;text-align:center;color:var(--muted);font-size:13px;}
 
 <div class="layout">
 <div class="board">
+<div class="bg-controls">
+<input type="color" id="bgColor" title="اختر لون الخلفية">
+<input type="text" id="bgImage" placeholder="رابط صورة للخلفية">
+<button id="applyBg">تطبيق الخلفية</button>
+</div>
 <div class="controls">
 <input id="siteName" placeholder="اسم الموقع">
 <input id="siteUrl" placeholder="رابط الموقع (https://)">
@@ -107,7 +116,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// Firebase config
 const firebaseConfig = {
 apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
 authDomain: "site-for-use.firebaseapp.com",
@@ -123,7 +131,6 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// DOM elements
 const addBtn=document.getElementById("addBtn");
 const siteList=document.getElementById("siteList");
 const sitesShort=document.getElementById("sitesShort");
@@ -139,11 +146,13 @@ const chatInput=document.getElementById("chatMessage");
 const sendMsgBtn=document.getElementById("sendMsgBtn");
 const chatHint=document.getElementById("chatHint");
 const emojiPanel = document.getElementById("emojiPanel");
+const bgColor = document.getElementById("bgColor");
+const bgImage = document.getElementById("bgImage");
+const applyBg = document.getElementById("applyBg");
 
 let currentUser=null;
 let editId=null;
 
-// Authentication
 loginBtn.addEventListener("click",async()=>{try{await signInWithPopup(auth,provider);}catch(e){alert("فشل تسجيل الدخول: "+e.message);}});
 logoutBtn.addEventListener("click",async()=>{await signOut(auth);});
 onAuthStateChanged(auth,user=>{
@@ -157,7 +166,6 @@ userNameEl.style.display=user?"inline-block":"none";
 chatHint.textContent=user?"مسجّل الدخول — يمكنك إرسال الرسائل وإضافة المواقع.":"سجّل الدخول لتستطيع الكتابة.";
 });
 
-// Sites handling
 const sitesCol=collection(db,"sites");
 onSnapshot(sitesCol,snapshot=>{
 siteList.innerHTML=""; sitesShort.innerHTML="";
@@ -186,7 +194,6 @@ sitesShort.appendChild(short);
 });
 });
 
-// Add/Edit site
 addBtn.addEventListener("click",async()=>{
 if(!currentUser){alert("سجّل الدخول أولاً");return;}
 const name=siteNameInput.value.trim(); const url=siteUrlInput.value.trim();
@@ -204,14 +211,11 @@ siteNameInput.value=""; siteUrlInput.value=""; siteImageInput.value="";
 function openEdit(id){editId=id; getDoc(doc(db,"sites",id)).then(snap=>{const data=snap.data(); siteNameInput.value=data.name; siteUrlInput.value=data.url; siteImageInput.value=data.image||""; addBtn.textContent="💾 حفظ التعديل";});}
 function deleteSite(id){if(confirm("هل تريد حذف الموقع؟")) deleteDoc(doc(db,"sites",id));}
 
-// Drag & Resize
 function enableDragResize(card,id){
 let offsetX=0,offsetY=0,isDragging=false;
 let startWidth=0,startHeight=0,isResizing=false;
-
 const dragHandle=card.querySelector(".drag-handle");
 const resizeHandle=card.querySelector(".resize-handle");
-
 dragHandle.addEventListener("mousedown",e=>{
 isDragging=true;
 offsetX=e.clientX-card.offsetLeft;
@@ -225,14 +229,9 @@ offsetX=e.clientX; offsetY=e.clientY;
 document.body.style.userSelect="none";
 });
 document.addEventListener("mousemove",e=>{
-if(isDragging){
-card.style.left=e.clientX-offsetX+"px";
-card.style.top=e.clientY-offsetY+"px";
-}
-if(isResizing){
-card.style.width=Math.max(100,startWidth+(e.clientX-offsetX))+"px";
-card.style.height=Math.max(120,startHeight+(e.clientY-offsetY))+"px";
-}
+if(isDragging){card.style.left=e.clientX-offsetX+"px"; card.style.top=e.clientY-offsetY+"px";}
+if(isResizing){card.style.width=Math.max(100,startWidth+(e.clientX-offsetX))+"px";
+card.style.height=Math.max(120,startHeight+(e.clientY-offsetY))+"px";}
 });
 document.addEventListener("mouseup",async()=>{
 if(isDragging||isResizing){
@@ -242,7 +241,6 @@ isDragging=false; isResizing=false; document.body.style.userSelect="auto";
 });
 }
 
-// Chat
 const chatCol=collection(db,"chat");
 onSnapshot(query(chatCol,orderBy("timestamp")),snapshot=>{
 chatBox.innerHTML="";
@@ -250,77 +248,4 @@ snapshot.forEach(docSnap=>{
 const msg=docSnap.data(); 
 const div=document.createElement("div");
 div.className="msg "+(msg.uid===currentUser?.uid?"me":"other");
-
-// User info
-const userInfo = document.createElement("div");
-userInfo.style.display = "flex"; userInfo.style.alignItems = "center"; userInfo.style.gap = "6px"; userInfo.style.marginBottom = "2px";
-const img = document.createElement("img");
-img.src = msg.photoURL || "https://via.placeholder.com/24";
-img.style.width = "24px"; img.style.height = "24px"; img.style.borderRadius = "50%"; img.style.objectFit = "cover";
-const name = document.createElement("span");
-name.textContent = msg.displayName || "مستخدم";
-name.style.fontSize = "12px"; name.style.color = msg.uid===currentUser?.uid?"#fff":"#555";
-userInfo.appendChild(img); userInfo.appendChild(name);
-
-const textDiv = document.createElement("div");
-textDiv.textContent = msg.text;
-
-div.innerHTML = "";
-div.appendChild(userInfo);
-div.appendChild(textDiv);
-
-div.style.maxWidth="70%";
-div.style.marginBottom="6px";
-div.style.clear="both";
-div.style.padding="6px 10px";
-div.style.borderRadius="12px";
-div.style.wordWrap="break-word";
-div.style.background = msg.uid===currentUser?.uid?"#2980b9":"#e0e0e0";
-div.style.color = msg.uid===currentUser?.uid?"#fff":"#000";
-div.style.float = msg.uid===currentUser?.uid?"right":"left";
-
-chatBox.appendChild(div);
-chatBox.scrollTop=chatBox.scrollHeight;
-});
-});
-
-sendMsgBtn.addEventListener("click",sendMsg);
-chatInput.addEventListener("keypress",e=>{if(e.key==="Enter")sendMsg();});
-function sendMsg(){
-if(!currentUser){alert("سجّل الدخول أولاً"); return;}
-const text=chatInput.value.trim(); if(!text) return;
-addDoc(chatCol,{
-text,
-uid:currentUser.uid,
-displayName: currentUser.displayName,
-photoURL: currentUser.photoURL,
-timestamp: serverTimestamp()
-});
-chatInput.value="";
-}
-
-// Emoji panel
-function toggleEmojiPanel() {
-if(emojiPanel.style.display==="block"){emojiPanel.style.display="none";}
-else{
-emojiPanel.style.display="block";
-if (!emojiPanel.hasChildNodes()) {
-const emojis = "😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤐 🤨 😐 😑 😶 😏".split(" ");
-emojis.forEach(e => {
-const span = document.createElement("span"); span.textContent = e;
-span.addEventListener("click", () => {chatInput.value += e; chatInput.focus();});
-emojiPanel.appendChild(span);
-});
-}
-}
-}
-// Close emoji panel if click outside
-document.addEventListener("click", function(e){
-if(!emojiPanel.contains(e.target) && e.target.id!=="chatMessage" && e.target.textContent!=="😊"){
-emojiPanel.style.display="none";
-}
-});
-</script>
-
-</body>
-</html>
+const userInfo =
