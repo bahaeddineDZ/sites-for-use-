@@ -2,22 +2,20 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>📚 مكتبتي للمواقع - بهاء</title>
+  <title>📚 مكتبتي للمواقع - BBE</title>
   <style>
     body { font-family: "Tahoma", sans-serif; background: #f4f6f9; margin: 0; padding: 0; }
     header { background: #2c3e50; color: white; padding: 15px; text-align: center; font-size: 22px; font-weight: bold; }
     .container { display: flex; flex-wrap: wrap; gap: 20px; padding: 20px; position: relative; }
     .inputs { width: 100%; display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
-    input, button { padding: 10px; border-radius: 8px; font-size: 15px; }
-    input { border: 1px solid #ccc; }
-    button { border: none; cursor: pointer; transition: 0.3s; }
-    button.add-btn { background: #2980b9; color: white; }
-    button.add-btn:hover { background: #1f6390; }
+    input { padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; }
+    button { background: #2980b9; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 15px; transition: 0.3s; }
+    button:hover { background: #1f6390; }
     .card { position: absolute; width: 200px; height: 250px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); background: white; overflow: hidden; transition: 0.2s; }
     .card img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
     .card-content { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; padding: 8px; text-align: center; }
     .actions { margin-top: 5px; }
-    .actions button { background: #c0392b; margin: 2px; color: white; }
+    .actions button { background: #c0392b; margin: 2px; }
     .drag-handle { position: absolute; top: 5px; right: 5px; width: 20px; height: 20px; background: #2980b9; border-radius: 4px; cursor: move; }
     .resize-handle { position: absolute; bottom: 5px; left: 5px; width: 15px; height: 15px; background: #27ae60; clip-path: polygon(0 100%, 100% 100%, 0 0); cursor: nwse-resize; }
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
@@ -33,8 +31,8 @@
     <div class="inputs">
       <input type="text" id="siteName" placeholder="اسم الموقع">
       <input type="url" id="siteUrl" placeholder="رابط الموقع (https://)">
-      <input type="file" id="siteImage" accept="image/*">
-      <button class="add-btn" onclick="handleAddSite()">➕ إضافة</button>
+      <input type="url" id="siteImage" placeholder="رابط الصورة (اختياري)">
+      <button onclick="handleAddSite()">➕ إضافة</button>
     </div>
     <div id="siteList" class="cards"></div>
   </div>
@@ -44,7 +42,7 @@
       <h3>✏️ تعديل الموقع</h3>
       <input type="text" id="editName" placeholder="اسم الموقع">
       <input type="url" id="editUrl" placeholder="الرابط">
-      <input type="file" id="editImage" accept="image/*">
+      <input type="url" id="editImage" placeholder="رابط الصورة (اختياري)">
       <div class="modal-buttons">
         <button onclick="handleSaveEdit()">💾 حفظ</button>
         <button onclick="closeModal()">❌ إلغاء</button>
@@ -55,7 +53,6 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
     import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
@@ -63,21 +60,22 @@
       projectId: "site-for-use",
       storageBucket: "site-for-use.appspot.com",
       messagingSenderId: "44820921915",
-      appId: "1:44820921915:web:27ff432c93b013e7a2a61e"
+      appId: "1:44820921915:web:27ff432c93b013e7a2a61e",
+      measurementId: "G-LRLK1DGEX7"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const storage = getStorage(app);
+
     const siteList = document.getElementById("siteList");
     let editId = null;
 
-    // تحديث تلقائي
     onSnapshot(collection(db, "sites"), snapshot => {
       siteList.innerHTML = "";
       snapshot.forEach(docSnap => {
         const site = docSnap.data();
         const id = docSnap.id;
+
         const card = document.createElement("div");
         card.className = "card";
         card.style.left = site.left || "0px";
@@ -97,11 +95,19 @@
             <button onclick="deleteSite('${id}')">🗑 حذف</button>
           </div>`;
 
-        const dragHandle = document.createElement("div"); dragHandle.className = "drag-handle";
-        const resizeHandle = document.createElement("div"); resizeHandle.className = "resize-handle";
+        const dragHandle = document.createElement("div");
+        dragHandle.className = "drag-handle";
 
-        card.append(img, content, dragHandle, resizeHandle);
+        const resizeHandle = document.createElement("div");
+        resizeHandle.className = "resize-handle";
+
+        card.appendChild(img);
+        card.appendChild(content);
+        card.appendChild(dragHandle);
+        card.appendChild(resizeHandle);
+
         enableDragResize(card, id);
+
         siteList.appendChild(card);
       });
     });
@@ -109,77 +115,91 @@
     async function handleAddSite() {
       const name = document.getElementById("siteName").value.trim();
       const url = document.getElementById("siteUrl").value.trim();
-      const file = document.getElementById("siteImage").files[0];
-      if (!name || !url) return alert("من فضلك أدخل الاسم والرابط");
+      const image = document.getElementById("siteImage").value.trim();
 
-      try {
-        let imageUrl = "";
-        if(file){
-          const storageRef = ref(storage, 'images/' + Date.now() + "_" + file.name);
-          await uploadBytes(storageRef, file);
-          imageUrl = await getDownloadURL(storageRef);
-        }
-        await addDoc(collection(db, "sites"), { name, url, image: imageUrl, left:"0px", top:"0px", width:"200px", height:"250px" });
-        document.getElementById("siteName").value = "";
-        document.getElementById("siteUrl").value = "";
-        document.getElementById("siteImage").value = "";
-        alert("تم إضافة الموقع بنجاح!");
-      } catch(err){ console.error(err); alert("حدث خطأ أثناء الإضافة."); }
+      if(!name || !url) return alert("من فضلك أدخل الاسم والرابط");
+
+      await addDoc(collection(db, "sites"), { name, url, image, left:"0px", top:"0px", width:"200px", height:"250px" });
+
+      document.getElementById("siteName").value = "";
+      document.getElementById("siteUrl").value = "";
+      document.getElementById("siteImage").value = "";
     }
 
-    async function deleteSite(id){ await deleteDoc(doc(db,"sites",id)); }
+    async function deleteSite(id){
+      await deleteDoc(doc(db,"sites",id));
+    }
+
     async function openEdit(id){
       editId = id;
       const docSnap = await getDoc(doc(db,"sites",id));
       const site = docSnap.data();
       document.getElementById("editName").value = site.name;
       document.getElementById("editUrl").value = site.url;
+      document.getElementById("editImage").value = site.image;
       document.getElementById("editModal").style.display="flex";
     }
+
     function closeModal(){ document.getElementById("editModal").style.display="none"; }
+
     async function handleSaveEdit(){
       const name = document.getElementById("editName").value.trim();
       const url = document.getElementById("editUrl").value.trim();
-      const file = document.getElementById("editImage").files[0];
-      let data = { name, url };
-      if(file){
-        const storageRef = ref(storage, 'images/' + Date.now() + "_" + file.name);
-        await uploadBytes(storageRef, file);
-        data.image = await getDownloadURL(storageRef);
-      }
-      await updateDoc(doc(db,"sites",editId), data);
+      const image = document.getElementById("editImage").value.trim();
+
+      await updateDoc(doc(db,"sites",editId), { name, url, image });
       closeModal();
     }
 
-    async function saveCardPosition(card, id){
-      await updateDoc(doc(db,"sites",id), { left: card.style.left, top: card.style.top, width: card.style.width, height: card.style.height });
+    async function saveCardPosition(card, id) {
+      await updateDoc(doc(db,"sites",id), {
+        left: card.style.left,
+        top: card.style.top,
+        width: card.style.width,
+        height: card.style.height
+      });
     }
 
     function enableDragResize(card, id){
       const dragHandle = card.querySelector(".drag-handle");
       const resizeHandle = card.querySelector(".resize-handle");
 
-      dragHandle.addEventListener("mousedown", e=>{
+      dragHandle.addEventListener("mousedown", (e)=>{
         e.preventDefault();
         let shiftX = e.clientX - card.getBoundingClientRect().left;
         let shiftY = e.clientY - card.getBoundingClientRect().top;
-        function moveAt(x,y){ card.style.left = x-shiftX+"px"; card.style.top = y-shiftY+"px"; }
+
+        function moveAt(pageX,pageY){ card.style.left = pageX - shiftX + "px"; card.style.top = pageY - shiftY + "px"; }
+
         function onMouseMove(ev){ moveAt(ev.pageX, ev.pageY); }
+
         document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("mouseup", ()=>{ document.removeEventListener("mousemove", onMouseMove); saveCardPosition(card,id); }, {once:true});
+        document.addEventListener("mouseup", ()=>{
+          document.removeEventListener("mousemove", onMouseMove);
+          saveCardPosition(card,id);
+        }, { once:true });
       });
 
-      resizeHandle.addEventListener("mousedown", e=>{
+      resizeHandle.addEventListener("mousedown", (e)=>{
         e.preventDefault();
-        const startX = e.clientX, startY = e.clientY;
-        const startW = parseInt(window.getComputedStyle(card).width), startH = parseInt(window.getComputedStyle(card).height);
-        function onMove(ev){
-          const newW = startW - (ev.clientX-startX), newH = startH - (ev.clientY-startY);
-          if(newW>100 && newH>100){ card.style.width=newW+"px"; card.style.height=newH+"px"; }
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startWidth = parseInt(window.getComputedStyle(card).width,10);
+        const startHeight = parseInt(window.getComputedStyle(card).height,10);
+
+        function onMouseMove(ev){
+          const newWidth = startWidth - (ev.clientX - startX);
+          const newHeight = startHeight - (ev.clientY - startY);
+          if(newWidth>100 && newHeight>100){ card.style.width = newWidth+"px"; card.style.height = newHeight+"px"; }
         }
-        function onUp(){ document.removeEventListener("mousemove",onMove); saveCardPosition(card,id); }
-        document.addEventListener("mousemove", onMove);
-        document.addEventListener("mouseup", onUp, {once:true});
+
+        function onMouseUp(){
+          document.removeEventListener("mousemove",onMouseMove);
+          saveCardPosition(card,id);
+        }
+
+        document.addEventListener("mousemove",onMouseMove);
+        document.addEventListener("mouseup",onMouseUp,{once:true});
       });
     }
   </script>
