@@ -13,7 +13,7 @@
   --card:#ffffff;
 }
 *{box-sizing:border-box;}
-body{font-family:Tahoma, Arial, sans-serif;margin:0;padding:0;min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#eef6fb,#f4f6f9);}
+body{font-family:Tahoma, Arial, sans-serif;margin:0;padding:0;min-height:100vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#eef6fb,#f4f6f9);font-size:14px;}
 header{background:var(--primary);color:#fff;padding:14px 18px;display:flex;gap:12px;align-items:center;justify-content:space-between;}
 header h1{margin:0;font-size:18px;}
 .user-area{display:flex;align-items:center;gap:10px;}
@@ -26,7 +26,7 @@ header h1{margin:0;font-size:18px;}
 .controls input{padding:10px;border-radius:10px;border:1px solid #d0d7de;font-size:14px;flex:1;min-width:140px;}
 .controls .add-btn{background:var(--accent);padding:10px 16px;border-radius:10px;color:#fff;border:none;cursor:pointer;}
 .controls .bg-btn{background:#2ecc71;color:#fff;padding:10px 16px;border-radius:10px;border:none;cursor:pointer;}
-#siteList{position:relative;min-height:420px;border-radius:12px;padding:12px;background:transparent;}
+#siteList{position:relative;min-height:420px;border-radius:12px;padding:12px;background:transparent;resize:vertical;overflow:auto;}
 .card{position:absolute;width:200px;height:250px;border-radius:12px;box-shadow:0 8px 18px rgba(0,0,0,0.12);overflow:hidden;background:var(--card);transition:transform .15s;}
 .card:hover{transform:translateY(-6px);}
 .card img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer;}
@@ -38,7 +38,7 @@ header h1{margin:0;font-size:18px;}
 .card .actions .delete{background:var(--danger);color:#fff;}
 .card .actions .edit{background:#f39c12;color:#fff;}
 .side{width:360px;max-width:40vw;display:flex;flex-direction:column;gap:12px;}
-.list-panel{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);min-height:180px;}
+.list-panel{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);min-height:180px;resize:vertical;overflow:auto;}
 .list-panel h3{margin:0 0 8px 0;font-size:16px;color:var(--primary);}
 .sites-list-short{display:flex;flex-direction:column;gap:8px;max-height:160px;overflow:auto;}
 .site-item{display:flex;gap:8px;align-items:center;}
@@ -54,7 +54,13 @@ header h1{margin:0;font-size:18px;}
 .emoji-panel{display:none;background:white;border:1px solid #ccc;border-radius:10px;padding:10px;max-height:120px;overflow-y:auto;position:absolute;bottom:60px;right:10px;z-index:1000;box-shadow:0 6px 12px rgba(0,0,0,0.15);transition:all 0.2s ease;}
 .emoji-panel span{cursor:pointer;font-size:20px;margin:5px;}
 #chatHint{margin-top:8px;font-size:12px;color:gray;text-align:center;}
-footer{padding:10px;text-align:center;color:var(--muted);font-size:13px;}
+.footer{padding:10px;text-align:center;color:var(--muted);font-size:13px;}
+.font-controls{display:flex;gap:6px;align-items:center;margin-bottom:6px;}
+.font-controls button{padding:4px 8px;border-radius:6px;border:none;background:#2980b9;color:#fff;cursor:pointer;}
+.font-controls button:hover{background:#1f5f87;}
+.page-tabs{display:flex;gap:6px;margin-bottom:6px;}
+.page-tabs button{padding:6px 12px;border:none;border-radius:6px;background:#bdc3c7;color:#2c3e50;cursor:pointer;}
+.page-tabs button.active{background:#2980b9;color:#fff;}
 @media(max-width:900px){.layout{flex-direction:column}.side{width:100%;}}
 </style>
 </head>
@@ -79,7 +85,22 @@ footer{padding:10px;text-align:center;color:var(--muted);font-size:13px;}
 <button id="addBtn" class="add-btn">➕ إضافة</button>
 <button id="changeBgBtn" class="bg-btn">🎨 تغيير الخلفية</button>
 </div>
-<div id="siteList" aria-live="polite"></div>
+
+<div class="font-controls">
+حجم الخط:
+<button data-size="12">12px</button>
+<button data-size="14" class="active">14px</button>
+<button data-size="16">16px</button>
+<button data-size="18">18px</button>
+</div>
+
+<div class="page-tabs" id="pageTabs">
+<button data-page="page-1" class="active">صفحة 1</button>
+<button data-page="page-2">صفحة 2</button>
+<button data-page="page-3">صفحة 3</button>
+</div>
+
+<div id="siteList" data-page="page-1"></div>
 </div>
 
 <div class="side">
@@ -102,21 +123,21 @@ footer{padding:10px;text-align:center;color:var(--muted);font-size:13px;}
 </div>
 </div>
 
-<footer>© مكتبتي للمواقع — BBE</footer>
+<footer class="footer">© مكتبتي للمواقع — BBE</footer>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
-authDomain: "site-for-use.firebaseapp.com",
-projectId: "site-for-use",
-storageBucket: "site-for-use.appspot.com",
-messagingSenderId: "44820921915",
-appId: "1:44820921915:web:27ff432c93b013e7a2a61e",
-measurementId: "G-LRLK1DGEX7"
+  apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
+  authDomain: "site-for-use.firebaseapp.com",
+  projectId: "site-for-use",
+  storageBucket: "site-for-use.appspot.com",
+  messagingSenderId: "44820921915",
+  appId: "1:44820921915:web:27ff432c93b013e7a2a61e",
+  measurementId: "G-LRLK1DGEX7"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -140,66 +161,91 @@ const sendMsgBtn=document.getElementById("sendMsgBtn");
 const chatHint=document.getElementById("chatHint");
 const emojiPanel = document.getElementById("emojiPanel");
 const changeBgBtn = document.getElementById("changeBgBtn");
+const pageTabs = document.getElementById("pageTabs");
+const fontButtons = document.querySelectorAll(".font-controls button");
 
 let currentUser=null;
 let editId=null;
+let currentPage="page-1";
 
 // Authentication
 loginBtn.addEventListener("click",async()=>{try{await signInWithPopup(auth,provider);}catch(e){alert("فشل تسجيل الدخول: "+e.message);}});
 logoutBtn.addEventListener("click",async()=>{await signOut(auth);});
 onAuthStateChanged(auth,user=>{
-currentUser=user||null;
-loginBtn.style.display=user?"none":"inline-block";
-logoutBtn.style.display=user?"inline-block":"none";
-userPic.src=user?.photoURL||"";
-userPic.style.display=user?.photoURL?"inline-block":"none";
-userNameEl.textContent=user?.displayName||user?.email||"مستخدم";
-userNameEl.style.display=user?"inline-block":"none";
-chatHint.textContent=user?"مسجّل الدخول — يمكنك إرسال الرسائل وإضافة المواقع.":"سجّل الدخول لتستطيع الكتابة.";
+  currentUser=user||null;
+  loginBtn.style.display=user?"none":"inline-block";
+  logoutBtn.style.display=user?"inline-block":"none";
+  userPic.src=user?.photoURL||"";
+  userPic.style.display=user?.photoURL?"inline-block":"none";
+  userNameEl.textContent=user?.displayName||user?.email||"مستخدم";
+  userNameEl.style.display=user?"inline-block":"none";
+  chatHint.textContent=user?"مسجّل الدخول — يمكنك إرسال الرسائل وإضافة المواقع.":"سجّل الدخول لتستطيع الكتابة.";
+
+  if(user) loadUserSettings(user.uid);
 });
 
-// Sites handling
+// Load user settings: font size & backgrounds
+async function loadUserSettings(uid){
+  const snap = await getDoc(doc(db,"users",uid));
+  if(snap.exists()){
+    const data = snap.data();
+    if(data.fontSize){
+      document.body.style.fontSize = data.fontSize + "px";
+      fontButtons.forEach(btn=>btn.classList.toggle("active",btn.dataset.size===data.fontSize));
+    }
+    if(data.pageBackgrounds){
+      Object.keys(data.pageBackgrounds).forEach(pid=>{
+        const bg = data.pageBackgrounds[pid];
+        const el = document.querySelector(`[data-page="${pid}"]`);
+        if(el) el.style.background = bg;
+      });
+    }
+  }
+}
+
+// Sites handling with page filter
 const sitesCol=collection(db,"sites");
 onSnapshot(sitesCol,snapshot=>{
-siteList.innerHTML=""; sitesShort.innerHTML="";
-snapshot.forEach(docSnap=>{
-const site=docSnap.data(); const id=docSnap.id;
-const card=document.createElement("div"); card.className="card";
-card.style.left=site.left||"0px"; card.style.top=site.top||"0px";
-card.style.width=site.width||"200px"; card.style.height=site.height||"250px";
-const img=document.createElement("img"); img.src=site.image||"https://via.placeholder.com/200x250";
-img.onclick=()=>window.open(site.url,"_blank");
-const content=document.createElement("div"); content.className="card-content";
-const title=document.createElement("h3"); title.textContent=site.name;
-const actions=document.createElement("div"); actions.className="actions";
-const editBtn=document.createElement("button"); editBtn.className="edit"; editBtn.textContent="✏️ تعديل"; editBtn.onclick=()=>openEdit(id);
-const deleteBtn=document.createElement("button"); deleteBtn.className="delete"; deleteBtn.textContent="🗑 حذف"; deleteBtn.onclick=()=>deleteSite(id);
-actions.appendChild(editBtn); actions.appendChild(deleteBtn);
-content.appendChild(title); content.appendChild(actions);
-const dragHandle=document.createElement("div"); dragHandle.className="drag-handle";
-const resizeHandle=document.createElement("div"); resizeHandle.className="resize-handle";
-card.appendChild(img); card.appendChild(content); card.appendChild(dragHandle); card.appendChild(resizeHandle);
-enableDragResize(card,id); siteList.appendChild(card);
+  siteList.innerHTML=""; sitesShort.innerHTML="";
+  snapshot.forEach(docSnap=>{
+    const site = docSnap.data(); const id=docSnap.id;
+    if(site.page!==currentPage) return;
+    const card=document.createElement("div"); card.className="card";
+    card.style.left=site.left||"0px"; card.style.top=site.top||"0px";
+    card.style.width=site.width||"200px"; card.style.height=site.height||"250px";
+    const img=document.createElement("img"); img.src=site.image||"https://via.placeholder.com/200x250";
+    img.onclick=()=>window.open(site.url,"_blank");
+    const content=document.createElement("div"); content.className="card-content";
+    const title=document.createElement("h3"); title.textContent=site.name;
+    const actions=document.createElement("div"); actions.className="actions";
+    const editBtn=document.createElement("button"); editBtn.className="edit"; editBtn.textContent="✏️ تعديل"; editBtn.onclick=()=>openEdit(id);
+    const deleteBtn=document.createElement("button"); deleteBtn.className="delete"; deleteBtn.textContent="🗑 حذف"; deleteBtn.onclick=()=>deleteSite(id);
+    actions.appendChild(editBtn); actions.appendChild(deleteBtn);
+    content.appendChild(title); content.appendChild(actions);
+    const dragHandle=document.createElement("div"); dragHandle.className="drag-handle";
+    const resizeHandle=document.createElement("div"); resizeHandle.className="resize-handle";
+    card.appendChild(img); card.appendChild(content); card.appendChild(dragHandle); card.appendChild(resizeHandle);
+    enableDragResize(card,id); siteList.appendChild(card);
 
-const short=document.createElement("div"); short.className="site-item";
-short.innerHTML=`<img src="${site.image||'https://via.placeholder.com/48x36'}"><a href="${site.url}" target="_blank">${site.name}</a>`;
-sitesShort.appendChild(short);
-});
+    const short=document.createElement("div"); short.className="site-item";
+    short.innerHTML=`<img src="${site.image||'https://via.placeholder.com/48x36'}"><a href="${site.url}" target="_blank">${site.name}</a>`;
+    sitesShort.appendChild(short);
+  });
 });
 
 // Add/Edit site
 addBtn.addEventListener("click",async()=>{
-if(!currentUser){alert("سجّل الدخول أولاً");return;}
-const name=siteNameInput.value.trim(); const url=siteUrlInput.value.trim();
-if(!name||!url){alert("املأ الاسم والرابط");return;}
-const image=siteImageInput.value.trim()||"";
-if(editId){
-await updateDoc(doc(db,"sites",editId),{name,url,image});
-editId=null; addBtn.textContent="➕ إضافة";
-}else{
-await addDoc(sitesCol,{name,url,image,left:"0px",top:"0px",width:"200px",height:"250px"});
-}
-siteNameInput.value=""; siteUrlInput.value=""; siteImageInput.value="";
+  if(!currentUser){alert("سجّل الدخول أولاً");return;}
+  const name=siteNameInput.value.trim(); const url=siteUrlInput.value.trim();
+  if(!name||!url){alert("املأ الاسم والرابط");return;}
+  const image=siteImageInput.value.trim()||"";
+  if(editId){
+    await updateDoc(doc(db,"sites",editId),{name,url,image,page:currentPage});
+    editId=null; addBtn.textContent="➕ إضافة";
+  }else{
+    await addDoc(sitesCol,{name,url,image,page:currentPage,left:"0px",top:"0px",width:"200px",height:"250px"});
+  }
+  siteNameInput.value=""; siteUrlInput.value=""; siteImageInput.value="";
 });
 
 function openEdit(id){editId=id; getDoc(doc(db,"sites",id)).then(snap=>{const data=snap.data(); siteNameInput.value=data.name; siteUrlInput.value=data.url; siteImageInput.value=data.image||""; addBtn.textContent="💾 حفظ التعديل";});}
@@ -207,82 +253,84 @@ function deleteSite(id){if(confirm("هل تريد حذف الموقع؟")) delet
 
 // Drag & Resize
 function enableDragResize(card,id){
-let offsetX=0,offsetY=0,isDragging=false;
-let startWidth=0,startHeight=0,isResizing=false;
-const dragHandle=card.querySelector(".drag-handle");
-const resizeHandle=card.querySelector(".resize-handle");
-dragHandle.addEventListener("mousedown",e=>{isDragging=true; offsetX=e.clientX-card.offsetLeft; offsetY=e.clientY-card.offsetTop; document.body.style.userSelect="none";});
-resizeHandle.addEventListener("mousedown",e=>{isResizing=true; startWidth=card.offsetWidth; startHeight=card.offsetHeight; offsetX=e.clientX; offsetY=e.clientY; document.body.style.userSelect="none";});
-document.addEventListener("mousemove",e=>{
-if(isDragging){card.style.left=e.clientX-offsetX+"px"; card.style.top=e.clientY-offsetY+"px";}
-if(isResizing){card.style.width=Math.max(100,startWidth+(e.clientX-offsetX))+"px"; card.style.height=Math.max(120,startHeight+(e.clientY-offsetY))+"px";}
-});
-document.addEventListener("mouseup",async()=>{
-if(isDragging||isResizing){
-await updateDoc(doc(db,"sites",id),{left:card.style.left,top:card.style.top,width:card.style.width,height:card.style.height});
-isDragging=false; isResizing=false; document.body.style.userSelect="auto";
-}
-});
+  let offsetX=0,offsetY=0,isDragging=false;
+  let startWidth=0,startHeight=0,isResizing=false;
+  const dragHandle=card.querySelector(".drag-handle");
+  const resizeHandle=card.querySelector(".resize-handle");
+  dragHandle.addEventListener("mousedown",e=>{isDragging=true;offsetX=e.clientX-card.offsetLeft;offsetY=e.clientY-card.offsetTop;document.body.style.userSelect="none";});
+  resizeHandle.addEventListener("mousedown",e=>{isResizing=true;startWidth=card.offsetWidth; startHeight=card.offsetHeight;offsetX=e.clientX; offsetY=e.clientY;document.body.style.userSelect="none";});
+  document.addEventListener("mousemove",e=>{
+    if(isDragging){card.style.left=e.clientX-offsetX+"px"; card.style.top=e.clientY-offsetY+"px";}
+    if(isResizing){card.style.width=Math.max(100,startWidth+(e.clientX-offsetX))+"px"; card.style.height=Math.max(120,startHeight+(e.clientY-offsetY))+"px";}
+  });
+  document.addEventListener("mouseup",async()=>{
+    if(isDragging||isResizing){
+      await updateDoc(doc(db,"sites",id),{left:card.style.left,top:card.style.top,width:card.style.width,height:card.style.height});
+      isDragging=false; isResizing=false; document.body.style.userSelect="auto";
+    }
+  });
 }
 
-// Load user background
-onAuthStateChanged(auth, async user => {
-    currentUser = user || null;
-    if(user){
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if(userDoc.exists()){
-            const data = userDoc.data();
-            if(data.bgUrl){
-                document.body.style.background = `url(${data.bgUrl}) no-repeat center center fixed`;
-                document.body.style.backgroundSize = "cover";
-            }
-        }
-    } else {
-        document.body.style.background = "linear-gradient(180deg,#eef6fb,#f4f6f9)";
-    }
+// Font Size
+fontButtons.forEach(btn=>{
+  btn.addEventListener("click",async()=>{
+    document.body.style.fontSize = btn.dataset.size + "px";
+    fontButtons.forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    if(currentUser) await setDoc(doc(db,"users",currentUser.uid), {fontSize: btn.dataset.size}, {merge:true});
+  });
+});
+
+// Background change
+changeBgBtn.addEventListener("click",async()=>{
+  const color = prompt("أدخل لون الخلفية (مثل #ffffff)"); 
+  if(!color) return; 
+  siteList.style.background=color;
+  if(currentUser){
+    await setDoc(doc(db,"users",currentUser.uid), {pageBackgrounds:{[currentPage]:color}}, {merge:true});
+  }
+});
+
+// Page tabs
+pageTabs.addEventListener("click",e=>{
+  if(e.target.tagName!=="BUTTON") return;
+  currentPage=e.target.dataset.page;
+  pageTabs.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+  e.target.classList.add("active");
+  siteList.dataset.page=currentPage;
 });
 
 // Chat
+sendMsgBtn.addEventListener("click",async()=>{
+  if(!currentUser){alert("سجّل الدخول أولاً");return;}
+  const msg=chatInput.value.trim(); if(!msg)return;
+  await addDoc(collection(db,"chat"),{user:currentUser.displayName,msg,timestamp:serverTimestamp()});
+  chatInput.value="";
+});
 const chatCol=collection(db,"chat");
-onSnapshot(query(chatCol,orderBy("timestamp")),snapshot=>{
-chatBox.innerHTML="";
-snapshot.forEach(docSnap=>{
-const msg=docSnap.data(); 
-const div=document.createElement("div"); div.className="msg "+(msg.uid===currentUser?.uid?"me":"other");
-const userInfo = document.createElement("div"); userInfo.style.display="flex"; userInfo.style.alignItems="center"; userInfo.style.gap = "6px"; userInfo.style.marginBottom = "2px";
-const img = document.createElement("img"); img.src = msg.photoURL || "https://via.placeholder.com/24"; img.style.width="24px"; img.style.height="24px"; img.style.borderRadius="50%"; img.style.objectFit="cover";
-const name = document.createElement("span"); name.textContent=msg.displayName||"مستخدم"; name.style.fontSize="12px"; name.style.color = msg.uid===currentUser?.uid?"#fff":"#555";
-userInfo.appendChild(img); userInfo.appendChild(name);
-const textDiv = document.createElement("div"); textDiv.textContent = msg.text;
-div.innerHTML = ""; div.appendChild(userInfo); div.appendChild(textDiv);
-div.style.maxWidth="70%"; div.style.marginBottom="6px"; div.style.clear="both"; div.style.padding="6px 10px"; div.style.borderRadius="12px"; div.style.wordWrap="break-word";
-div.style.background = msg.uid===currentUser?.uid?"#2980b9":"#e0e0e0"; div.style.color = msg.uid===currentUser?.uid?"#fff":"#000";
-div.style.float = msg.uid===currentUser?.uid?"right":"left";
-chatBox.appendChild(div); chatBox.scrollTop=chatBox.scrollHeight;
+onSnapshot(query(chatCol,orderBy("timestamp","asc")),snapshot=>{
+  chatBox.innerHTML="";
+  snapshot.forEach(docSnap=>{
+    const data=docSnap.data();
+    const msgDiv=document.createElement("div");
+    msgDiv.className="msg";
+    msgDiv.textContent=`${data.user||"مجهول"}: ${data.msg}`;
+    chatBox.appendChild(msgDiv);
+    chatBox.scrollTop=chatBox.scrollHeight;
+  });
 });
-});
-
-sendMsgBtn.addEventListener("click",sendMsg);
-chatInput.addEventListener("keypress",e=>{if(e.key==="Enter")sendMsg();});
-function sendMsg(){if(!currentUser){alert("سجّل الدخول أولاً"); return;}
-const text=chatInput.value.trim(); if(!text) return;
-addDoc(chatCol,{uid:currentUser.uid,displayName:currentUser.displayName,photoURL:currentUser.photoURL,text,timestamp:serverTimestamp()});
-chatInput.value="";
-}
 
 // Emoji
-const emojis=["😀","😂","😎","😍","👍","🎉","😢","😡","🤔","🙏"];
-emojis.forEach(e=>{const span=document.createElement("span"); span.textContent=e; span.onclick=()=>{chatInput.value+=e;}; emojiPanel.appendChild(span);});
-function toggleEmojiPanel(){emojiPanel.style.display=emojiPanel.style.display==="block"?"none":"block";}
-
-// Change background
-changeBgBtn.addEventListener("click",async ()=>{
-if(!currentUser){alert("سجّل الدخول أولاً"); return;}
-const bgUrl=prompt("ضع رابط الخلفية:");
-if(bgUrl){document.body.style.background=`url(${bgUrl}) no-repeat center center fixed`; document.body.style.backgroundSize="cover";
-await setDoc(doc(db,"users",currentUser.uid),{bgUrl},{merge:true});}
-});
+const emojis=["😀","😂","😎","😊","😢","❤️","👍","🙌","🎉"];
+function toggleEmojiPanel(){
+  emojiPanel.style.display=emojiPanel.style.display==="block"?"none":"block";
+  if(emojiPanel.innerHTML==="") emojis.forEach(e=>{
+    const span=document.createElement("span"); span.textContent=e;
+    span.onclick=()=>{chatInput.value+=e; chatInput.focus();};
+    emojiPanel.appendChild(span);
+  });
+}
+document.addEventListener("click",e=>{if(!emojiPanel.contains(e.target)&&e.target.tagName!=="BUTTON") emojiPanel.style.display="none";});
 </script>
-
 </body>
 </html>
