@@ -4,138 +4,25 @@
   <meta charset="UTF-8">
   <title>📚 مكتبتي للمواقع - بهاء</title>
   <style>
-    body {
-      font-family: "Tahoma", sans-serif;
-      background: #f4f6f9;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #2c3e50;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 22px;
-      font-weight: bold;
-    }
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      padding: 20px;
-      position: relative;
-    }
-    .inputs {
-      width: 100%;
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    input {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 15px;
-    }
-    button {
-      background: #2980b9;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 15px;
-      transition: 0.3s;
-    }
-    button:hover {
-      background: #1f6390;
-    }
-    .card {
-      position: absolute;
-      width: 200px;
-      height: 250px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      background: white;
-      overflow: hidden;
-      transition: 0.2s;
-    }
-    .card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      cursor: pointer;
-    }
-    .card-content {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0,0,0,0.6);
-      color: white;
-      padding: 8px;
-      text-align: center;
-    }
-    .actions {
-      margin-top: 5px;
-    }
-    .actions button {
-      background: #c0392b;
-      margin: 2px;
-    }
-    .drag-handle {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      width: 20px;
-      height: 20px;
-      background: #2980b9;
-      border-radius: 4px;
-      cursor: move;
-    }
-    .resize-handle {
-      position: absolute;
-      bottom: 5px;
-      left: 5px;
-      width: 15px;
-      height: 15px;
-      background: #27ae60;
-      clip-path: polygon(0 100%, 100% 100%, 0 0);
-      cursor: nwse-resize;
-    }
-    /* 🔹 نافذة منبثقة */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 300px;
-      text-align: center;
-    }
-    .modal-content input {
-      width: 100%;
-      margin: 8px 0;
-    }
-    .modal-buttons {
-      margin-top: 15px;
-      display: flex;
-      justify-content: space-between;
-    }
-    .modal-buttons button {
-      flex: 1;
-      margin: 0 5px;
-    }
+    body { font-family: "Tahoma", sans-serif; background: #f4f6f9; margin: 0; padding: 0; }
+    header { background: #2c3e50; color: white; padding: 15px; text-align: center; font-size: 22px; font-weight: bold; }
+    .container { display: flex; flex-wrap: wrap; gap: 20px; padding: 20px; position: relative; }
+    .inputs { width: 100%; display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+    input { padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; }
+    button { background: #2980b9; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 15px; transition: 0.3s; }
+    button:hover { background: #1f6390; }
+    .card { position: absolute; width: 200px; height: 250px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); background: white; overflow: hidden; transition: 0.2s; }
+    .card img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
+    .card-content { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; padding: 8px; text-align: center; }
+    .actions { margin-top: 5px; }
+    .actions button { background: #c0392b; margin: 2px; }
+    .drag-handle { position: absolute; top: 5px; right: 5px; width: 20px; height: 20px; background: #2980b9; border-radius: 4px; cursor: move; }
+    .resize-handle { position: absolute; bottom: 5px; left: 5px; width: 15px; height: 15px; background: #27ae60; clip-path: polygon(0 100%, 100% 100%, 0 0); cursor: nwse-resize; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { background: white; padding: 20px; border-radius: 10px; width: 300px; text-align: center; }
+    .modal-content input { width: 100%; margin: 8px 0; }
+    .modal-buttons { margin-top: 15px; display: flex; justify-content: space-between; }
+    .modal-buttons button { flex: 1; margin: 0 5px; }
   </style>
 </head>
 <body>
@@ -145,12 +32,11 @@
       <input type="text" id="siteName" placeholder="اسم الموقع">
       <input type="url" id="siteUrl" placeholder="رابط الموقع (https://)">
       <input type="file" id="siteImage" accept="image/*">
-      <button onclick="addSite()">➕ إضافة</button>
+      <button onclick="handleAddSite()">➕ إضافة</button>
     </div>
     <div id="siteList" class="cards"></div>
   </div>
 
-  <!-- نافذة التعديل -->
   <div id="editModal" class="modal">
     <div class="modal-content">
       <h3>✏️ تعديل الموقع</h3>
@@ -158,38 +44,42 @@
       <input type="url" id="editUrl" placeholder="الرابط">
       <input type="file" id="editImage" accept="image/*">
       <div class="modal-buttons">
-        <button onclick="saveEdit()">💾 حفظ</button>
+        <button onclick="handleSaveEdit()">💾 حفظ</button>
         <button onclick="closeModal()">❌ إلغاء</button>
       </div>
     </div>
   </div>
 
-  <!-- 🔹 Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
+    import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
 
-  <script>
-    // 🔹 ضع هنا إعدادات مشروع Firebase الخاص بك
     const firebaseConfig = {
-      apiKey: "API_KEY_HERE",
-      authDomain: "PROJECT_ID.firebaseapp.com",
-      projectId: "PROJECT_ID",
-      storageBucket: "PROJECT_ID.appspot.com",
-      messagingSenderId: "SENDER_ID",
-      appId: "APP_ID"
+      apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
+      authDomain: "site-for-use.firebaseapp.com",
+      projectId: "site-for-use",
+      storageBucket: "site-for-use.appspot.com",
+      messagingSenderId: "44820921915",
+      appId: "1:44820921915:web:27ff432c93b013e7a2a61e",
+      measurementId: "G-LRLK1DGEX7"
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
 
     const siteList = document.getElementById("siteList");
     let editId = null;
 
-    // 🔹 تحميل المواقع والتحديث اللحظي
-    db.collection("sites").onSnapshot(snapshot => {
+    // 🔹 التحديث اللحظي لجميع المستخدمين
+    onSnapshot(collection(db, "sites"), snapshot => {
       siteList.innerHTML = "";
-      snapshot.forEach(doc => {
-        const site = doc.data();
-        const id = doc.id;
+      snapshot.forEach(docSnap => {
+        const site = docSnap.data();
+        const id = docSnap.id;
 
         const card = document.createElement("div");
         card.className = "card";
@@ -228,67 +118,62 @@
     });
 
     // 🔹 إضافة موقع
-    function addSite() {
+    async function handleAddSite() {
       const name = document.getElementById("siteName").value.trim();
       const url = document.getElementById("siteUrl").value.trim();
       const file = document.getElementById("siteImage").files[0];
 
-      if (!name || !url) return alert("من فضلك أدخل الاسم والرابط");
+      if(!name || !url) return alert("من فضلك أدخل الاسم والرابط");
 
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          db.collection("sites").add({ name, url, image: e.target.result });
-        };
-        reader.readAsDataURL(file);
-      } else {
-        db.collection("sites").add({ name, url });
+      let imageUrl = "";
+      if(file){
+        const storageRef = ref(storage, 'images/' + Date.now() + "_" + file.name);
+        await uploadBytes(storageRef, file);
+        imageUrl = await getDownloadURL(storageRef);
       }
+
+      await addDoc(collection(db, "sites"), { name, url, image: imageUrl, left:"0px", top:"0px", width:"200px", height:"250px" });
+      document.getElementById("siteName").value = "";
+      document.getElementById("siteUrl").value = "";
+      document.getElementById("siteImage").value = "";
     }
 
     // 🔹 حذف موقع
-    function deleteSite(id) {
-      db.collection("sites").doc(id).delete();
+    async function deleteSite(id){
+      await deleteDoc(doc(db,"sites",id));
     }
 
-    // 🔹 فتح نافذة التعديل
-    function openEdit(id) {
+    // 🔹 تعديل موقع
+    async function openEdit(id){
       editId = id;
-      db.collection("sites").doc(id).get().then(doc => {
-        const site = doc.data();
-        document.getElementById("editName").value = site.name;
-        document.getElementById("editUrl").value = site.url;
-        document.getElementById("editModal").style.display = "flex";
-      });
+      const docSnap = await getDoc(doc(db,"sites",id));
+      const site = docSnap.data();
+      document.getElementById("editName").value = site.name;
+      document.getElementById("editUrl").value = site.url;
+      document.getElementById("editModal").style.display="flex";
     }
 
-    function closeModal() {
-      document.getElementById("editModal").style.display = "none";
-    }
+    function closeModal(){ document.getElementById("editModal").style.display="none"; }
 
-    // 🔹 حفظ التعديلات
-    function saveEdit() {
+    async function handleSaveEdit(){
       const name = document.getElementById("editName").value.trim();
       const url = document.getElementById("editUrl").value.trim();
       const file = document.getElementById("editImage").files[0];
 
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          db.collection("sites").doc(editId).update({
-            name, url, image: e.target.result
-          });
-        };
-        reader.readAsDataURL(file);
-      } else {
-        db.collection("sites").doc(editId).update({ name, url });
+      let data = { name, url };
+      if(file){
+        const storageRef = ref(storage, 'images/' + Date.now() + "_" + file.name);
+        await uploadBytes(storageRef, file);
+        data.image = await getDownloadURL(storageRef);
       }
+
+      await updateDoc(doc(db,"sites",editId), data);
       closeModal();
     }
 
     // 🔹 حفظ موقع وحجمه بعد السحب أو التكبير
-    function saveCardPosition(card, id) {
-      db.collection("sites").doc(id).update({
+    async function saveCardPosition(card, id) {
+      await updateDoc(doc(db,"sites",id), {
         left: card.style.left,
         top: card.style.top,
         width: card.style.width,
@@ -297,54 +182,46 @@
     }
 
     // 🔹 دوال السحب والتكبير
-    function enableDragResize(card, id) {
+    function enableDragResize(card, id){
       const dragHandle = card.querySelector(".drag-handle");
       const resizeHandle = card.querySelector(".resize-handle");
 
-      dragHandle.addEventListener("mousedown", (e) => {
+      dragHandle.addEventListener("mousedown", (e)=>{
         e.preventDefault();
         let shiftX = e.clientX - card.getBoundingClientRect().left;
         let shiftY = e.clientY - card.getBoundingClientRect().top;
 
-        function moveAt(pageX, pageY) {
-          card.style.left = pageX - shiftX + "px";
-          card.style.top = pageY - shiftY + "px";
-        }
+        function moveAt(pageX,pageY){ card.style.left = pageX - shiftX + "px"; card.style.top = pageY - shiftY + "px"; }
 
-        function onMouseMove(ev) {
-          moveAt(ev.pageX, ev.pageY);
-        }
+        function onMouseMove(ev){ moveAt(ev.pageX, ev.pageY); }
 
         document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("mouseup", () => {
+        document.addEventListener("mouseup", ()=>{
           document.removeEventListener("mousemove", onMouseMove);
-          saveCardPosition(card, id);
-        }, { once: true });
+          saveCardPosition(card,id);
+        }, { once:true });
       });
 
-      resizeHandle.addEventListener("mousedown", (e) => {
+      resizeHandle.addEventListener("mousedown", (e)=>{
         e.preventDefault();
         const startX = e.clientX;
         const startY = e.clientY;
-        const startWidth = parseInt(window.getComputedStyle(card).width, 10);
-        const startHeight = parseInt(window.getComputedStyle(card).height, 10);
+        const startWidth = parseInt(window.getComputedStyle(card).width,10);
+        const startHeight = parseInt(window.getComputedStyle(card).height,10);
 
-        function onMouseMove(ev) {
+        function onMouseMove(ev){
           const newWidth = startWidth - (ev.clientX - startX);
           const newHeight = startHeight - (ev.clientY - startY);
-          if (newWidth > 100 && newHeight > 100) {
-            card.style.width = newWidth + "px";
-            card.style.height = newHeight + "px";
-          }
+          if(newWidth>100 && newHeight>100){ card.style.width = newWidth+"px"; card.style.height = newHeight+"px"; }
         }
 
-        function onMouseUp() {
-          document.removeEventListener("mousemove", onMouseMove);
-          saveCardPosition(card, id);
+        function onMouseUp(){
+          document.removeEventListener("mousemove",onMouseMove);
+          saveCardPosition(card,id);
         }
 
-        document.addEventListener("mousemove", onMouseMove);
-        document.addEventListener("mouseup", onMouseUp, { once: true });
+        document.addEventListener("mousemove",onMouseMove);
+        document.addEventListener("mouseup",onMouseUp,{once:true});
       });
     }
   </script>
