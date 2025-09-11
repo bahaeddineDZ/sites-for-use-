@@ -26,10 +26,7 @@ header h1{margin:0;font-size:18px;}
 .controls input{padding:10px;border-radius:10px;border:1px solid #d0d7de;font-size:14px;flex:1;min-width:140px;}
 .controls .add-btn{background:var(--accent);padding:10px 16px;border-radius:10px;color:#fff;border:none;cursor:pointer;}
 .controls .bg-btn{background:#2ecc71;color:#fff;padding:10px 16px;border-radius:10px;border:none;cursor:pointer;}
-.pages-nav{margin-bottom:12px;display:flex;gap:6px;}
-.pages-nav button{padding:6px 10px;border:none;border-radius:6px;background:#2980b9;color:#fff;cursor:pointer;}
-.pages-nav button:hover{background:#1f5f87;}
-.site-page{position:relative;min-height:420px;border-radius:12px;padding:12px;background:transparent;}
+#siteList{position:relative;min-height:420px;border-radius:12px;padding:12px;background:transparent;}
 .card{position:absolute;width:200px;height:250px;border-radius:12px;box-shadow:0 8px 18px rgba(0,0,0,0.12);overflow:hidden;background:var(--card);transition:transform .15s;}
 .card:hover{transform:translateY(-6px);}
 .card img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer;}
@@ -81,13 +78,8 @@ footer{padding:10px;text-align:center;color:var(--muted);font-size:13px;}
 <input id="siteImage" placeholder="رابط صورة (اختياري)">
 <button id="addBtn" class="add-btn">➕ إضافة</button>
 <button id="changeBgBtn" class="bg-btn">🎨 تغيير الخلفية</button>
-<button id="addPageBtn" class="bg-btn">➕ صفحة جديدة</button>
 </div>
-
-<div id="pagesNav" class="pages-nav"></div>
-
-<!-- هنا ستضاف الصفحات تلقائيًا -->
-<div id="pagesContainer"></div>
+<div id="siteList" aria-live="polite"></div>
 </div>
 
 <div class="side">
@@ -114,7 +106,7 @@ footer{padding:10px;text-align:center;color:var(--muted);font-size:13px;}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -132,10 +124,8 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// عناصر DOM
 const addBtn=document.getElementById("addBtn");
-const pagesContainer=document.getElementById("pagesContainer");
-const pagesNav=document.getElementById("pagesNav");
+const siteList=document.getElementById("siteList");
 const sitesShort=document.getElementById("sitesShort");
 const siteNameInput=document.getElementById("siteName");
 const siteUrlInput=document.getElementById("siteUrl");
@@ -150,12 +140,9 @@ const sendMsgBtn=document.getElementById("sendMsgBtn");
 const chatHint=document.getElementById("chatHint");
 const emojiPanel = document.getElementById("emojiPanel");
 const changeBgBtn = document.getElementById("changeBgBtn");
-const addPageBtn = document.getElementById("addPageBtn");
 
 let currentUser=null;
 let editId=null;
-let pages=["page1"]; // البداية بصفحة واحدة
-let currentPage="page1";
 
 // Authentication
 loginBtn.addEventListener("click",async()=>{try{await signInWithPopup(auth,provider);}catch(e){alert("فشل تسجيل الدخول: "+e.message);}});
@@ -171,80 +158,34 @@ userNameEl.style.display=user?"inline-block":"none";
 chatHint.textContent=user?"مسجّل الدخول — يمكنك إرسال الرسائل وإضافة المواقع.":"سجّل الدخول لتستطيع الكتابة.";
 });
 
-// إنشاء الصفحات
-function renderPages(){
-  pagesContainer.innerHTML="";
-  pagesNav.innerHTML="";
-  pages.forEach(p=>{
-    const div = document.createElement("div");
-    div.id=p;
-    div.className="site-page";
-    div.style.display = (p===currentPage)?"block":"none";
-    pagesContainer.appendChild(div);
-
-    const btn = document.createElement("button");
-    btn.textContent = p;
-    btn.onclick=()=>{currentPage=p; renderPages(); renderSites();}
-    pagesNav.appendChild(btn);
-  });
-}
-renderPages();
-
-// إضافة صفحة جديدة
-addPageBtn.addEventListener("click",()=>{
-  const name=prompt("ضع اسم للصفحة الجديدة (مثال: page2):");
-  if(name && !pages.includes(name)){
-    pages.push(name);
-    currentPage=name;
-    renderPages();
-    renderSites();
-  }
-});
-
 // Sites handling
 const sitesCol=collection(db,"sites");
-function renderSites(){
-  onSnapshot(sitesCol,snapshot=>{
-    document.querySelectorAll('.site-page').forEach(p=>p.innerHTML="");
-    sitesShort.innerHTML="";
-    snapshot.forEach(docSnap=>{
-      const site=docSnap.data(); 
-      const id=docSnap.id;
-      const pageDiv = document.getElementById(site.page || "page1");
-      if(!pageDiv) return;
+onSnapshot(sitesCol,snapshot=>{
+siteList.innerHTML=""; sitesShort.innerHTML="";
+snapshot.forEach(docSnap=>{
+const site=docSnap.data(); const id=docSnap.id;
+const card=document.createElement("div"); card.className="card";
+card.style.left=site.left||"0px"; card.style.top=site.top||"0px";
+card.style.width=site.width||"200px"; card.style.height=site.height||"250px";
+const img=document.createElement("img"); img.src=site.image||"https://via.placeholder.com/200x250";
+img.onclick=()=>window.open(site.url,"_blank");
+const content=document.createElement("div"); content.className="card-content";
+const title=document.createElement("h3"); title.textContent=site.name;
+const actions=document.createElement("div"); actions.className="actions";
+const editBtn=document.createElement("button"); editBtn.className="edit"; editBtn.textContent="✏️ تعديل"; editBtn.onclick=()=>openEdit(id);
+const deleteBtn=document.createElement("button"); deleteBtn.className="delete"; deleteBtn.textContent="🗑 حذف"; deleteBtn.onclick=()=>deleteSite(id);
+actions.appendChild(editBtn); actions.appendChild(deleteBtn);
+content.appendChild(title); content.appendChild(actions);
+const dragHandle=document.createElement("div"); dragHandle.className="drag-handle";
+const resizeHandle=document.createElement("div"); resizeHandle.className="resize-handle";
+card.appendChild(img); card.appendChild(content); card.appendChild(dragHandle); card.appendChild(resizeHandle);
+enableDragResize(card,id); siteList.appendChild(card);
 
-      const card=document.createElement("div");
-      card.className="card";
-      card.style.left=site.left||"0px";
-      card.style.top=site.top||"0px";
-      card.style.width=site.width||"200px";
-      card.style.height=site.height||"250px";
-
-      const img=document.createElement("img");
-      img.src=site.image||"https://via.placeholder.com/200x250";
-      img.onclick=()=>window.open(site.url,"_blank");
-
-      const content=document.createElement("div"); content.className="card-content";
-      const title=document.createElement("h3"); title.textContent=site.name;
-      const actions=document.createElement("div"); actions.className="actions";
-      const editBtn=document.createElement("button"); editBtn.className="edit"; editBtn.textContent="✏️ تعديل"; editBtn.onclick=()=>openEdit(id);
-      const deleteBtn=document.createElement("button"); deleteBtn.className="delete"; deleteBtn.textContent="🗑 حذف"; deleteBtn.onclick=()=>deleteSite(id);
-      const moveBtn=document.createElement("button"); moveBtn.className="edit"; moveBtn.textContent="🔀 نقل"; moveBtn.onclick=()=>moveCard(id);
-
-      actions.append(editBtn, deleteBtn, moveBtn);
-      content.append(title, actions);
-      card.append(img, content);
-      enableDragResize(card,id);
-      pageDiv.appendChild(card);
-
-      // القوائم المختصرة
-      const short=document.createElement("div"); short.className="site-item";
-      short.innerHTML=`<img src="${site.image||'https://via.placeholder.com/48x36'}"><a href="${site.url}" target="_blank">${site.name}</a>`;
-      sitesShort.appendChild(short);
-    });
-  });
-}
-renderSites();
+const short=document.createElement("div"); short.className="site-item";
+short.innerHTML=`<img src="${site.image||'https://via.placeholder.com/48x36'}"><a href="${site.url}" target="_blank">${site.name}</a>`;
+sitesShort.appendChild(short);
+});
+});
 
 // Add/Edit site
 addBtn.addEventListener("click",async()=>{
@@ -253,10 +194,10 @@ const name=siteNameInput.value.trim(); const url=siteUrlInput.value.trim();
 if(!name||!url){alert("املأ الاسم والرابط");return;}
 const image=siteImageInput.value.trim()||"";
 if(editId){
-await updateDoc(doc(db,"sites",editId),{name,url,image,page:currentPage});
+await updateDoc(doc(db,"sites",editId),{name,url,image});
 editId=null; addBtn.textContent="➕ إضافة";
 }else{
-await addDoc(sitesCol,{name,url,image,left:"0px",top:"0px",width:"200px",height:"250px",page:currentPage});
+await addDoc(sitesCol,{name,url,image,left:"0px",top:"0px",width:"200px",height:"250px"});
 }
 siteNameInput.value=""; siteUrlInput.value=""; siteImageInput.value="";
 });
@@ -264,68 +205,84 @@ siteNameInput.value=""; siteUrlInput.value=""; siteImageInput.value="";
 function openEdit(id){editId=id; getDoc(doc(db,"sites",id)).then(snap=>{const data=snap.data(); siteNameInput.value=data.name; siteUrlInput.value=data.url; siteImageInput.value=data.image||""; addBtn.textContent="💾 حفظ التعديل";});}
 function deleteSite(id){if(confirm("هل تريد حذف الموقع؟")) deleteDoc(doc(db,"sites",id));}
 
-// نقل البطاقات بين الصفحات
-async function moveCard(id){
-  const newPage = prompt("ضع اسم الصفحة الجديدة لنقل البطاقة إليها:");
-  if(newPage && pages.includes(newPage)){
-    await updateDoc(doc(db,"sites",id), { page: newPage });
-  } else { alert("الصفحة غير موجودة!"); }
-}
-
 // Drag & Resize
 function enableDragResize(card,id){
 let offsetX=0,offsetY=0,isDragging=false;
 let startWidth=0,startHeight=0,isResizing=false;
-
 const dragHandle=card.querySelector(".drag-handle");
 const resizeHandle=card.querySelector(".resize-handle");
-
-dragHandle?.addEventListener("mousedown",e=>{
-isDragging=true; offsetX=e.offsetX; offsetY=e.offsetY; e.preventDefault();
-});
-resizeHandle?.addEventListener("mousedown",e=>{
-isResizing=true; startWidth=card.offsetWidth; startHeight=card.offsetHeight; offsetX=e.offsetX; offsetY=e.offsetY; e.preventDefault();
-});
+dragHandle.addEventListener("mousedown",e=>{isDragging=true; offsetX=e.clientX-card.offsetLeft; offsetY=e.clientY-card.offsetTop; document.body.style.userSelect="none";});
+resizeHandle.addEventListener("mousedown",e=>{isResizing=true; startWidth=card.offsetWidth; startHeight=card.offsetHeight; offsetX=e.clientX; offsetY=e.clientY; document.body.style.userSelect="none";});
 document.addEventListener("mousemove",e=>{
-if(isDragging){
-card.style.left=(e.clientX-offsetX)+"px";
-card.style.top=(e.clientY-offsetY)+"px";
-}
-if(isResizing){
-card.style.width=(startWidth+(e.clientX-offsetX))+"px";
-card.style.height=(startHeight+(e.clientY-offsetY))+"px";
-}
+if(isDragging){card.style.left=e.clientX-offsetX+"px"; card.style.top=e.clientY-offsetY+"px";}
+if(isResizing){card.style.width=Math.max(100,startWidth+(e.clientX-offsetX))+"px"; card.style.height=Math.max(120,startHeight+(e.clientY-offsetY))+"px";}
 });
 document.addEventListener("mouseup",async()=>{
-if(isDragging || isResizing){
-isDragging=false; isResizing=false;
+if(isDragging||isResizing){
 await updateDoc(doc(db,"sites",id),{left:card.style.left,top:card.style.top,width:card.style.width,height:card.style.height});
+isDragging=false; isResizing=false; document.body.style.userSelect="auto";
 }
 });
+}
 
-// أزرار إضافية
-changeBgBtn.addEventListener("click",()=>{document.body.style.background=`linear-gradient(180deg,${prompt("لون البداية","#eef6fb")},${prompt("لون النهاية","#f4f6f9")})`;});
-
-// الدردشة
-sendMsgBtn.addEventListener("click",async()=>{
-if(!currentUser) return alert("سجّل الدخول أولاً");
-const msgText=chatInput.value.trim();
-if(!msgText) return;
-await addDoc(collection(db,"chat"),{uid:currentUser.uid,name:currentUser.displayName||currentUser.email,msg:msgText,time:serverTimestamp()});
-chatInput.value="";
+// Load user background
+onAuthStateChanged(auth, async user => {
+    currentUser = user || null;
+    if(user){
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if(userDoc.exists()){
+            const data = userDoc.data();
+            if(data.bgUrl){
+                document.body.style.background = `url(${data.bgUrl}) no-repeat center center fixed`;
+                document.body.style.backgroundSize = "cover";
+            }
+        }
+    } else {
+        document.body.style.background = "linear-gradient(180deg,#eef6fb,#f4f6f9)";
+    }
 });
-onSnapshot(query(collection(db,"chat"),orderBy("time")),(snapshot)=>{
+
+// Chat
+const chatCol=collection(db,"chat");
+onSnapshot(query(chatCol,orderBy("timestamp")),snapshot=>{
 chatBox.innerHTML="";
-snapshot.forEach(docSnap=>{const c=docSnap.data();
-const div=document.createElement("div"); div.className="msg"; div.textContent=`${c.name}: ${c.msg}`;
+snapshot.forEach(docSnap=>{
+const msg=docSnap.data(); 
+const div=document.createElement("div"); div.className="msg "+(msg.uid===currentUser?.uid?"me":"other");
+const userInfo = document.createElement("div"); userInfo.style.display="flex"; userInfo.style.alignItems="center"; userInfo.style.gap = "6px"; userInfo.style.marginBottom = "2px";
+const img = document.createElement("img"); img.src = msg.photoURL || "https://via.placeholder.com/24"; img.style.width="24px"; img.style.height="24px"; img.style.borderRadius="50%"; img.style.objectFit="cover";
+const name = document.createElement("span"); name.textContent=msg.displayName||"مستخدم"; name.style.fontSize="12px"; name.style.color = msg.uid===currentUser?.uid?"#fff":"#555";
+userInfo.appendChild(img); userInfo.appendChild(name);
+const textDiv = document.createElement("div"); textDiv.textContent = msg.text;
+div.innerHTML = ""; div.appendChild(userInfo); div.appendChild(textDiv);
+div.style.maxWidth="70%"; div.style.marginBottom="6px"; div.style.clear="both"; div.style.padding="6px 10px"; div.style.borderRadius="12px"; div.style.wordWrap="break-word";
+div.style.background = msg.uid===currentUser?.uid?"#2980b9":"#e0e0e0"; div.style.color = msg.uid===currentUser?.uid?"#fff":"#000";
+div.style.float = msg.uid===currentUser?.uid?"right":"left";
 chatBox.appendChild(div); chatBox.scrollTop=chatBox.scrollHeight;
 });
 });
 
-// إيموجي
-const emojis=["😀","😂","😅","😎","😍","😡","👍","👎","🙏","🎉"];
+sendMsgBtn.addEventListener("click",sendMsg);
+chatInput.addEventListener("keypress",e=>{if(e.key==="Enter")sendMsg();});
+function sendMsg(){if(!currentUser){alert("سجّل الدخول أولاً"); return;}
+const text=chatInput.value.trim(); if(!text) return;
+addDoc(chatCol,{uid:currentUser.uid,displayName:currentUser.displayName,photoURL:currentUser.photoURL,text,timestamp:serverTimestamp()});
+chatInput.value="";
+}
+
+// Emoji
+const emojis=["😀","😂","😎","😍","👍","🎉","😢","😡","🤔","🙏"];
+emojis.forEach(e=>{const span=document.createElement("span"); span.textContent=e; span.onclick=()=>{chatInput.value+=e;}; emojiPanel.appendChild(span);});
 function toggleEmojiPanel(){emojiPanel.style.display=emojiPanel.style.display==="block"?"none":"block";}
-emojis.forEach(e=>{const span=document.createElement("span"); span.textContent=e; span.onclick=()=>{chatInput.value+=e;} ; emojiPanel.appendChild(span);});
+
+// Change background
+changeBgBtn.addEventListener("click",async ()=>{
+if(!currentUser){alert("سجّل الدخول أولاً"); return;}
+const bgUrl=prompt("ضع رابط الخلفية:");
+if(bgUrl){document.body.style.background=`url(${bgUrl}) no-repeat center center fixed`; document.body.style.backgroundSize="cover";
+await setDoc(doc(db,"users",currentUser.uid),{bgUrl},{merge:true});}
+});
 </script>
+
 </body>
 </html>
