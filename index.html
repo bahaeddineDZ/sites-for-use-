@@ -220,6 +220,15 @@
         document.addEventListener("mouseup",onMouseUp,{once:true});
       });
     }
+
+    // 🔹 اختبار Firestore: إضافة وثيقة تجريبية عند تحميل الصفحة
+    addDoc(collection(db, "sites"), {
+      name: "موقع تجريبي",
+      url: "https://example.com",
+      image: "https://via.placeholder.com/200x250"
+    }).then(() => console.log("✅ تمت الإضافة بنجاح"))
+      .catch(err => console.error("❌ خطأ:", err));
+
   </script>
 </body>
 </html>
