@@ -236,6 +236,33 @@ isDragging=false; isResizing=false; document.body.style.userSelect="auto";
 }
 });
 }
+// Firestore reference لخلفية المستخدم
+const usersCol = collection(db, "users");
+
+// تحميل الخلفية عند تسجيل الدخول
+onAuthStateChanged(auth, async user => {
+    currentUser = user || null;
+    loginBtn.style.display = user ? "none" : "inline-block";
+    logoutBtn.style.display = user ? "inline-block" : "none";
+    userPic.src = user?.photoURL || "";
+    userPic.style.display = user?.photoURL ? "inline-block" : "none";
+    userNameEl.textContent = user?.displayName || user?.email || "مستخدم";
+    userNameEl.style.display = user ? "inline-block" : "none";
+    chatHint.textContent = user ? "مسجّل الدخول — يمكنك إرسال الرسائل وإضافة المواقع." : "سجّل الدخول لتستطيع الكتابة.";
+
+    if(user){
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if(userDoc.exists()){
+            const data = userDoc.data();
+            if(data.bgUrl){
+                document.body.style.background = `url(${data.bgUrl}) no-repeat center center fixed`;
+                document.body.style.backgroundSize = "cover";
+            }
+        }
+    } else {
+        document.body.style.background = "linear-gradient(180deg,#eef6fb,#f4f6f9)";
+    }
+});
 
 // Chat
 const chatCol=collection(db,"chat");
@@ -278,9 +305,18 @@ emojis.forEach(e => {const span = document.createElement("span"); span.textConte
 }
 
 // Change background
-changeBgBtn.addEventListener("click",()=>{
-const url=prompt("ضع رابط صورة للخلفية:");
-if(url) document.body.style.background=`url(${url}) no-repeat center center fixed`; document.body.style.backgroundSize="cover";
+changeBgBtn.addEventListener("click", async () => {
+    if(!currentUser){ alert("سجّل الدخول أولاً"); return; }
+    const url = prompt("ضع رابط صورة للخلفية:");
+    if(url){
+        document.body.style.background = `url(${url}) no-repeat center center fixed`;
+        document.body.style.backgroundSize = "cover";
+        // حفظ الرابط في Firestore تحت المستخدم الحالي
+        await updateDoc(doc(db, "users", currentUser.uid), { bgUrl: url }).catch(async()=>{
+            // إذا لم يكن المستند موجود، إنشئه
+            await setDoc(doc(db, "users", currentUser.uid), { bgUrl: url });
+        });
+    }
 });
 
 </script>
