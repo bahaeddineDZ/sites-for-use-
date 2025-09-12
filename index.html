@@ -1,727 +1,1641 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>📚 مكتبتي للمواقع - Baha - (خلفية: لون/صورة في Firestore + تحكم بالخط والشفافية)</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-/* ==================================================
-   Extended detailed styles (طويل ومفصّل)
-   ================================================== */
-:root{
-  --primary:#2c3e50;
-  --accent:#2980b9;
-  --danger:#e74c3c;
-  --success:#27ae60;
-  --muted:#7f8c8d;
-  --card:#ffffff;
-  /* تحكم في حجم الخط والشفافية */
-  --base-font-size:14px; /* يمكن تغييره ديناميكياً */
-  --card-opacity:1;      /* شفافية البطاقات */
-  --panel-opacity:1;     /* شفافية اللوحات (القوائم، دردشة) */
-  --img-opacity:1;       /* ما إذا كانت الصور تتبع نفس الشفافية */
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;}
-body{font-family:Tahoma, Arial, sans-serif;background:linear-gradient(180deg,#eef6fb,#f4f6f9);color:var(--primary);display:flex;flex-direction:column;font-size:var(--base-font-size)}
+  <meta charset="UTF-8">
+  <title>📚 مكتبتي للمواقع - Baha - (نسخة مطوّلة كاملة مع مشغل صوتيات)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* ==================================================
+       نسخة مطوّلة جداً من CSS — كل خاصية في سطر منفصل
+       ================================================== */
 
-/* Header */
-header{background:var(--primary);color:white;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-header h1{font-size:1.15rem;margin:0}
-.user-area{display:flex;align-items:center;gap:10px}
-.user-pic{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.16)}
-.btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
-.btn.secondary{background:#fff;color:var(--accent);border:1px solid rgba(0,0,0,0.06)}
+    :root {
+      /* ألوان أساسية */
+      --primary: #2c3e50;
+      --accent: #2980b9;
+      --danger: #e74c3c;
+      --success: #27ae60;
+      --muted: #7f8c8d;
+      --card: #ffffff;
 
-/* Layout */
-.layout{display:flex;gap:18px;padding:18px;flex:1;align-items:flex-start;position:relative}
-.board{flex:1;min-width:320px;position:relative}
-.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
-.controls input[type="text"], .controls input[type="url"]{padding:10px;border-radius:10px;border:1px solid #d0d7de;font-size:14px;flex:1;min-width:140px}
-.controls .add-btn{background:var(--accent);padding:10px 16px;border-radius:10px;color:#fff;border:none;cursor:pointer}
-.controls .bg-btn{background:var(--success);color:#fff;padding:10px 16px;border-radius:10px;border:none;cursor:pointer}
+      /* تحكم في واجهة المستخدم */
+      --base-font-size: 14px; /* القيمة الافتراضية لحجم الخط */
+      --card-opacity: 1;      /* شفافية بطاقات المواقع */
+      --panel-opacity: 1;     /* شفافية اللوحات (القائمة، الدردشة، المشغل) */
+      --img-opacity: 1;       /* شفافية الصور (تطبق إذا فعلت خيار تطبيق الشفافية على الصور) */
+    }
 
-/* view control group (حجم الخط و الشفافية) */
-.view-controls{display:flex;gap:8px;align-items:center}
-.view-controls .control-group{display:flex;flex-direction:column;gap:6px;background:rgba(255,255,255,0.06);padding:8px;border-radius:10px;border:1px solid rgba(0,0,0,0.03)}
-.view-controls label{font-size:0.85rem;color:var(--muted)}
-.view-controls input[type='range']{width:160px}
-.view-controls .smallVal{font-size:0.85rem;color:var(--muted);text-align:center}
+    /* Reset بسيط */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-/* Site cards area */
-#siteList{position:relative;min-height:420px;border-radius:12px;padding:12px;background:transparent}
-.card{position:absolute;width:200px;height:250px;border-radius:12px;box-shadow:0 8px 18px rgba(0,0,0,0.12);overflow:hidden;transition:transform .15s;border:1px solid rgba(0,0,0,0.04);background:rgba(255,255,255,var(--card-opacity));opacity:1}
-.card:hover{transform:translateY(-6px)}
-.card img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer;opacity:var(--img-opacity)}
-.card-content{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.35));color:#fff;padding:8px;text-align:center}
-.card-content h3{margin:0;font-size:0.95rem}
-.card .drag-handle{position:absolute;top:6px;right:6px;width:22px;height:22px;background:var(--accent);border-radius:6px;cursor:move;z-index:20;display:flex;align-items:center;justify-content:center;color:#fff}
-.card .resize-handle{position:absolute;left:6px;bottom:6px;width:18px;height:18px;background:var(--success);clip-path:polygon(0 100%,100% 100%,0 0);cursor:nwse-resize;z-index:20}
-.card .actions button{margin:2px;padding:6px 8px;border-radius:8px;border:none;cursor:pointer}
-.card .actions .delete{background:var(--danger);color:#fff}
-.card .actions .edit{background:#f39c12;color:#fff}
+    html,
+    body {
+      height: 100%;
+    }
 
-/* Side panels (list & chat) */
-.list-panel{background:rgba(255,255,255,var(--panel-opacity));padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);min-height:180px;position:absolute;left:20px;top:20px;width:320px;height:240px;z-index:40;border:1px solid rgba(0,0,0,0.06)}
-.list-panel h3{margin:0 0 8px 0;font-size:16px;color:var(--primary)}
-.sites-list-short{display:flex;flex-direction:column;gap:8px;max-height:calc(100% - 56px);overflow:auto}
-.site-item{display:flex;gap:8px;align-items:center}
-.site-item img{width:48px;height:36px;object-fit:cover;border-radius:6px}
-.site-item a{color:var(--accent);text-decoration:none;display:block}
+    body {
+      font-family: Tahoma, Arial, sans-serif;
+      background: linear-gradient(180deg, #eef6fb, #f4f6f9);
+      color: var(--primary);
+      display: flex;
+      flex-direction: column;
+      font-size: var(--base-font-size);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-.chat-panel{display:flex;flex-direction:column;gap:8px;background:rgba(255,255,255,var(--panel-opacity));padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);position:absolute;right:20px;top:260px;width:380px;height:420px;z-index:38;border:1px solid rgba(0,0,0,0.06)}
-.chat-panel h3{margin:0 0 4px 0;font-size:16px;color:var(--primary)}
-#chatBox{overflow:auto;border-radius:8px;padding:8px;background:#fbfdff;border:1px solid #eef5fb;height:calc(100% - 140px)}
-.msg{display:inline-block;padding:8px 12px;margin:5px 0;border-radius:15px;max-width:70%;clear:both;word-wrap:break-word}
-.chat-controls{display:flex;gap:5px;margin-top:6px;position:relative}
-.chat-controls input{flex:1;padding:8px;border:1px solid #ccc;border-radius:6px}
-.chat-controls button{padding:8px 12px;border:none;border-radius:6px;background:#2980b9;color:white;cursor:pointer}
-.chat-controls button:hover{background:#1f5f87}
-.emoji-panel{display:none;background:white;border:1px solid #ccc;border-radius:10px;padding:10px;max-height:120px;overflow-y:auto;position:absolute;bottom:60px;right:10px;z-index:1000;box-shadow:0 6px 12px rgba(0,0,0,0.15);transition:all 0.2s ease}
-.emoji-panel span{cursor:pointer;font-size:20px;margin:5px}
-#chatHint{margin-top:8px;font-size:12px;color:gray;text-align:center}
+    /* Header */
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
 
-/* Panel handles (green) */
-.panel-drag-handle{position:absolute;top:8px;right:8px;width:28px;height:28px;background:var(--success);border-radius:8px;cursor:move;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;z-index:60}
-.panel-resize-handle{position:absolute;left:8px;bottom:8px;width:20px;height:20px;background:var(--success);clip-path:polygon(0 100%,100% 100%,0 0);cursor:nwse-resize;z-index:60}
+    header h1 {
+      font-size: 1.15rem;
+      margin: 0;
+    }
 
-/* Responsive tweaks */
-@media(max-width:900px){.layout{flex-direction:column}.side{width:100%}.list-panel{position:static;width:auto;height:auto}.chat-panel{position:static;width:auto;height:auto}}
+    .user-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-/* Utility */
-.hidden{display:none}
-.small{font-size:12px;color:var(--muted)}
-</style>
+    .user-pic {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn.secondary {
+      background: #fff;
+      color: var(--accent);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    /* Layout */
+    .layout {
+      display: flex;
+      gap: 18px;
+      padding: 18px;
+      flex: 1;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    .board {
+      flex: 1;
+      min-width: 320px;
+      position: relative;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .controls input[type="text"],
+    .controls input[type="url"] {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d0d7de;
+      font-size: 14px;
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .controls .add-btn {
+      background: var(--accent);
+      padding: 10px 16px;
+      border-radius: 10px;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .controls .bg-btn {
+      background: var(--success);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* view control group */
+    .view-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .view-controls .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(255,255,255,0.06);
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+
+    .view-controls label {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .view-controls input[type='range'] {
+      width: 160px;
+    }
+
+    .view-controls .smallVal {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* Site cards area */
+    #siteList {
+      position: relative;
+      min-height: 420px;
+      border-radius: 12px;
+      padding: 12px;
+      background: transparent;
+    }
+
+    .card {
+      position: absolute;
+      width: 200px;
+      height: 250px;
+      border-radius: 12px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+      overflow: hidden;
+      transition: transform .15s;
+      border: 1px solid rgba(0,0,0,0.04);
+      background: rgba(255,255,255,var(--card-opacity));
+      opacity: 1;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+    }
+
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      cursor: pointer;
+      opacity: var(--img-opacity);
+    }
+
+    .card-content {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.35));
+      color: #fff;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .card-content h3 {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .card .drag-handle {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 22px;
+      height: 22px;
+      background: var(--accent);
+      border-radius: 6px;
+      cursor: move;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .card .resize-handle {
+      position: absolute;
+      left: 6px;
+      bottom: 6px;
+      width: 18px;
+      height: 18px;
+      background: var(--success);
+      clip-path: polygon(0 100%, 100% 100%, 0 0);
+      cursor: nwse-resize;
+      z-index: 20;
+    }
+
+    .card .actions button {
+      margin: 2px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .card .actions .delete {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .card .actions .edit {
+      background: #f39c12;
+      color: #fff;
+    }
+
+    /* Side panels */
+    .list-panel {
+      background: rgba(255,255,255,var(--panel-opacity));
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+      min-height: 180px;
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      width: 320px;
+      height: 240px;
+      z-index: 40;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .list-panel h3 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      color: var(--primary);
+    }
+
+    .sites-list-short {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: calc(100% - 56px);
+      overflow: auto;
+    }
+
+    .site-item {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .site-item img {
+      width: 48px;
+      height: 36px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .site-item a {
+      color: var(--accent);
+      text-decoration: none;
+      display: block;
+    }
+
+    .chat-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(255,255,255,var(--panel-opacity));
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+      position: absolute;
+      right: 20px;
+      top: 260px;
+      width: 380px;
+      height: 420px;
+      z-index: 38;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .chat-panel h3 {
+      margin: 0 0 4px 0;
+      font-size: 16px;
+      color: var(--primary);
+    }
+
+    #chatBox {
+      overflow: auto;
+      border-radius: 8px;
+      padding: 8px;
+      background: #fbfdff;
+      border: 1px solid #eef5fb;
+      height: calc(100% - 140px);
+    }
+
+    .msg {
+      display: inline-block;
+      padding: 8px 12px;
+      margin: 5px 0;
+      border-radius: 15px;
+      max-width: 70%;
+      clear: both;
+      word-wrap: break-word;
+    }
+
+    .chat-controls {
+      display: flex;
+      gap: 5px;
+      margin-top: 6px;
+      position: relative;
+    }
+
+    .chat-controls input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .chat-controls button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      background: #2980b9;
+      color: white;
+      cursor: pointer;
+    }
+
+    .chat-controls button:hover {
+      background: #1f5f87;
+    }
+
+    .emoji-panel {
+      display: none;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 10px;
+      max-height: 120px;
+      overflow-y: auto;
+      position: absolute;
+      bottom: 60px;
+      right: 10px;
+      z-index: 1000;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      transition: all 0.2s ease;
+    }
+
+    .emoji-panel span {
+      cursor: pointer;
+      font-size: 20px;
+      margin: 5px;
+    }
+
+    #chatHint {
+      margin-top: 8px;
+      font-size: 12px;
+      color: gray;
+      text-align: center;
+    }
+
+    .panel-drag-handle {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      background: var(--success);
+      border-radius: 8px;
+      cursor: move;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      z-index: 60;
+    }
+
+    .panel-resize-handle {
+      position: absolute;
+      left: 8px;
+      bottom: 8px;
+      width: 20px;
+      height: 20px;
+      background: var(--success);
+      clip-path: polygon(0 100%, 100% 100%, 0 0);
+      cursor: nwse-resize;
+      z-index: 60;
+    }
+
+    /* Audio player card مطوّل */
+    .audio-card {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 18px;
+      width: 720px;
+      max-width: calc(100% - 40px);
+      background: rgba(255,255,255,var(--panel-opacity));
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+      z-index: 45;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .audio-card h3 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+    }
+
+    .playlist {
+      max-height: 160px;
+      overflow: auto;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #eef5fb;
+      background: #fbfdff;
+    }
+
+    .playlist li {
+      list-style: none;
+      padding: 6px 8px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .playlist li button {
+      margin-left: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .track-name {
+      font-weight: bold;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        flex-direction: column;
+      }
+
+      .list-panel {
+        position: static;
+        width: auto;
+        height: auto;
+      }
+
+      .chat-panel {
+        position: static;
+        width: auto;
+        height: auto;
+      }
+
+      .audio-card {
+        position: static;
+        transform: none;
+        width: auto;
+        margin-top: 12px;
+      }
+    }
+
+    .hidden { display: none; }
+    .small { font-size: 12px; color: var(--muted); }
+
+  </style>
 </head>
 <body>
 
-<header>
-  <h1>📚 مكتبتي للمواقع - Baha -</h1>
-  <div class="user-area" id="userArea">
-    <img id="userPic" class="user-pic" src="" alt="" style="display:none">
-    <div id="userName" class="small" style="display:none"></div>
-    <button id="loginBtn" class="btn">🔑 تسجيل الدخول</button>
-    <button id="logoutBtn" class="btn secondary" style="display:none">تسجيل الخروج</button>
-  </div>
-</header>
+  <header>
+    <h1>📚 مكتبتي للمواقع - Baha - (مطوّل)</h1>
+    <div class="user-area" id="userArea">
+      <img id="userPic" class="user-pic" src="" alt="" style="display:none">
+      <div id="userName" class="small" style="display:none"></div>
+      <button id="loginBtn" class="btn">🔑 تسجيل الدخول</button>
+      <button id="logoutBtn" class="btn secondary" style="display:none">تسجيل الخروج</button>
+    </div>
+  </header>
 
-<div class="layout">
-  <div class="board">
-    <div class="controls">
-      <input id="siteName" placeholder="اسم الموقع">
-      <input id="siteUrl" placeholder="رابط الموقع (https://)">
-      <input id="siteImage" placeholder="رابط صورة (اختياري)">
-      <button id="addBtn" class="add-btn">➕ إضافة</button>
-      <button id="changeBgBtn" class="bg-btn">🎨 تغيير الخلفية (لون/صورة)</button>
+  <div class="layout">
 
-      <!-- view controls: حجم الخط و الشفافية -->
-      <div class="view-controls">
-        <div class="control-group" style="min-width:220px;">
-          <label for="fontSizeRange">حجم الخط</label>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <input id="fontSizeRange" type="range" min="12" max="20" step="1" value="14">
-            <div id="fontSizeValue" class="smallVal">14px</div>
+    <!-- اللوحة الرئيسية: القوائم والبطاقات -->
+    <div class="board">
+
+      <!-- منطقة أدوات التحكم (إضافة موقع، تغيير الخلفية، التحكم بالحجم/شفافية) -->
+      <div class="controls">
+        <input id="siteName" placeholder="اسم الموقع">
+        <input id="siteUrl" placeholder="رابط الموقع (https://)">
+        <input id="siteImage" placeholder="رابط صورة (اختياري)">
+        <button id="addBtn" class="add-btn">➕ إضافة</button>
+        <button id="changeBgBtn" class="bg-btn">🎨 تغيير الخلفية (لون/صورة)</button>
+
+        <!-- view controls -->
+        <div class="view-controls">
+          <div class="control-group" style="min-width:220px;">
+            <label for="fontSizeRange">حجم الخط</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input id="fontSizeRange" type="range" min="12" max="20" step="1" value="14">
+              <div id="fontSizeValue" class="smallVal">14px</div>
+            </div>
+          </div>
+
+          <div class="control-group" style="min-width:220px;">
+            <label for="opacityRange">شفافية البطاقات والقوائم</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input id="opacityRange" type="range" min="0.2" max="1" step="0.05" value="1">
+              <div id="opacityValue" class="smallVal">100%</div>
+            </div>
+            <label style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;color:var(--muted)"><input id="applyToImages" type="checkbox"> تطبيق الشفافية على الصور</label>
+          </div>
+
+          <div style="display:flex;flex-direction:column;justify-content:center;gap:6px;">
+            <button id="resetView" class="btn secondary">إعادة الإعدادات</button>
           </div>
         </div>
 
-        <div class="control-group" style="min-width:220px;">
-          <label for="opacityRange">شفافية البطاقات والقوائم</label>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <input id="opacityRange" type="range" min="0.2" max="1" step="0.05" value="1">
-            <div id="opacityValue" class="smallVal">100%</div>
-          </div>
-          <label style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;color:var(--muted)"><input id="applyToImages" type="checkbox"> تطبيق الشفافية على الصور</label>
+      </div>
+
+      <!-- حاوية البطاقات -->
+      <div id="siteList" aria-live="polite"></div>
+
+    </div>
+
+    <!-- قائمة المواقع الجانبية -->
+    <div class="list-panel" id="listPanel" style="position:absolute; left:20px; top:20px; width:320px; height:240px;">
+      <div class="panel-drag-handle" title="اسحب">⬍</div>
+      <h3>قائمة المواقع</h3>
+      <div class="sites-list-short" id="sitesShort"></div>
+      <div class="panel-resize-handle" title="تغيير الحجم"></div>
+    </div>
+
+    <!-- نافذة الدردشة -->
+    <div class="chat-panel" id="chatPanel" style="position:absolute; right:20px; top:260px; width:380px; height:420px;">
+      <div class="panel-drag-handle" title="اسحب">⬍</div>
+      <h3>الدردشة الحية</h3>
+      <div id="chatBox"></div>
+      <div class="chat-controls">
+        <input id="chatMessage" placeholder="اكتب رسالتك..." />
+        <button type="button" onclick="toggleEmojiPanel()">😊</button>
+        <button id="sendMsgBtn">📨</button>
+      </div>
+      <div id="emojiPanel" class="emoji-panel"></div>
+      <div id="chatHint" class="small">سجّل الدخول لتستطيع الكتابة.</div>
+      <div class="panel-resize-handle" title="تغيير الحجم"></div>
+    </div>
+
+    <!-- مشغل الصوتيات كبطاقة خاصة ومطوّلة -->
+    <div class="audio-card" id="audioCard">
+      <h3>🎵 مشغل الصوتيات</h3>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div style="flex:1;">
+          <div id="track-name" class="track-name">لا يوجد ملف مشغل</div>
+          <audio id="audio" controls style="width:100%;margin-top:8px"></audio>
         </div>
 
-        <div style="display:flex;flex-direction:column;justify-content:center;gap:6px;">
-          <button id="resetView" class="btn secondary">إعادة الإعدادات</button>
+        <div style="display:flex;flex-direction:column;gap:8px;min-width:220px;">
+          <div style="display:flex;gap:8px;">
+            <button id="prevBtn" class="btn secondary">⏮️ السابق</button>
+            <button id="nextBtn" class="btn">⏭️ التالي</button>
+          </div>
+
+          <div style="display:flex;gap:6px;">
+            <input id="newTrackUrl" placeholder="رابط الصوت (Direct link)" style="flex:1;padding:8px;border-radius:8px;border:1px solid #ddd">
+            <input id="newTrackName" placeholder="اسم الملف (اختياري)" style="width:160px;padding:8px;border-radius:8px;border:1px solid #ddd">
+          </div>
+
+          <div style="display:flex;gap:6px;">
+            <button id="addTrackBtn" class="btn">➕ أضف للصوتيات</button>
+            <button id="savePlaylistBtn" class="btn secondary">💾 حفظ القائمة</button>
+            <button id="clearPlaylistBtn" class="btn secondary">🗑 تفريغ</button>
+          </div>
         </div>
       </div>
 
+      <div style="margin-top:12px">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:6px">قائمة التشغيل (اضغط لتشغيل، اسحب لحذف أو عدّل الاسم):</div>
+        <ul id="playlist" class="playlist"></ul>
+      </div>
+
+      <div style="margin-top:8px;font-size:12px;color:var(--muted)">ملاحظة: روابط Google Drive يجب تحويلها إلى رابط تنزيل مباشر (<code>https://docs.google.com/uc?export=download&id=FILE_ID</code>) أو رفع الملفات إلى Firebase Storage وإعطاء الرابط المباشر.</div>
     </div>
-    <div id="siteList" aria-live="polite"></div>
+
   </div>
 
-  <!-- قائمة المواقع -->
-  <div class="list-panel" id="listPanel" style="position:absolute; left:20px; top:20px; width:320px; height:240px;">
-    <div class="panel-drag-handle" title="اسحب">⬍</div>
-    <h3>قائمة المواقع</h3>
-    <div class="sites-list-short" id="sitesShort"></div>
-    <div class="panel-resize-handle" title="تغيير الحجم"></div>
-  </div>
+  <footer style="padding:10px;text-align:center;color:var(--muted);font-size:13px;">© مكتبتي للمواقع — BBE</footer>
 
-  <!-- نافذة الدردشة -->
-  <div class="chat-panel" id="chatPanel" style="position:absolute; right:20px; top:260px; width:380px; height:420px;">
-    <div class="panel-drag-handle" title="اسحب">⬍</div>
-    <h3>الدردشة الحية</h3>
-    <div id="chatBox"></div>
-    <div class="chat-controls">
-      <input id="chatMessage" placeholder="اكتب رسالتك..." />
-      <button type="button" onclick="toggleEmojiPanel()">😊</button>
-      <button id="sendMsgBtn">📨</button>
-    </div>
-    <div id="emojiPanel" class="emoji-panel"></div>
-    <div id="chatHint" class="small">سجّل الدخول لتستطيع الكتابة.</div>
-    <div class="panel-resize-handle" title="تغيير الحجم"></div>
-  </div>
+  <script type="module">
+    /* ==================================================
+       نسخة جافاسكربت مطوّلة وواضحة — كل دالة مقسّمة وتعليقات
+       تشمل: Firebase init, Auth, Firestore operations,
+       إدارة البطاقات، الدردشة، المشغل، الحفظ المحلي/سحابي.
+       ================================================== */
 
-</div>
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-<footer style="padding:10px;text-align:center;color:var(--muted);font-size:13px;">© مكتبتي للمواقع — BBE</footer>
+    // ----------------------------
+    // إعداد Firebase — ضع التكوين الخاص بك هنا
+    // ----------------------------
+    const firebaseConfig = {
+      apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
+      authDomain: "site-for-use.firebaseapp.com",
+      projectId: "site-for-use",
+      storageBucket: "site-for-use.appspot.com",
+      messagingSenderId: "44820921915",
+      appId: "1:44820921915:web:27ff432c93b013e7a2a61e",
+      measurementId: "G-LRLK1DGEX7"
+    };
 
-<script type="module">
-/*
-  نسخة مفصّلة: حفظ الخلفية كلون أو صورة في Firestore تحت users/<uid>/settings.background
-  بالإضافة إلى النسخ المحلية في localStorage كنسخة احتياطية.
-  تمت إضافة: تحكم بحجم الخط وشفافية البطاقات/القوائم (تخزّن في users/<uid>/settings.ui)
-*/
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    // ----------------------------
+    // عناصر ال DOM الرئيسية
+    // ----------------------------
+    const addBtn = document.getElementById("addBtn");
+    const siteList = document.getElementById("siteList");
+    const sitesShort = document.getElementById("sitesShort");
+    const siteNameInput = document.getElementById("siteName");
+    const siteUrlInput = document.getElementById("siteUrl");
+    const siteImageInput = document.getElementById("siteImage");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const userPic = document.getElementById("userPic");
+    const userNameEl = document.getElementById("userName");
+    const chatBox = document.getElementById("chatBox");
+    const chatInput = document.getElementById("chatMessage");
+    const sendMsgBtn = document.getElementById("sendMsgBtn");
+    const chatHint = document.getElementById("chatHint");
+    const emojiPanel = document.getElementById("emojiPanel");
+    const changeBgBtn = document.getElementById("changeBgBtn");
+    const listPanel = document.getElementById('listPanel');
+    const chatPanel = document.getElementById('chatPanel');
 
-// ----------------------------
-// إعداد Firebase (احتفظ بقيمك أو استبدلها)
-// ----------------------------
-const firebaseConfig = {
-  apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
-  authDomain: "site-for-use.firebaseapp.com",
-  projectId: "site-for-use",
-  storageBucket: "site-for-use.appspot.com",
-  messagingSenderId: "44820921915",
-  appId: "1:44820921915:web:27ff432c93b013e7a2a61e",
-  measurementId: "G-LRLK1DGEX7"
-};
+    // عناصر تحكم الواجهة
+    const fontSizeRange = document.getElementById('fontSizeRange');
+    const fontSizeValue = document.getElementById('fontSizeValue');
+    const opacityRange = document.getElementById('opacityRange');
+    const opacityValue = document.getElementById('opacityValue');
+    const applyToImages = document.getElementById('applyToImages');
+    const resetViewBtn = document.getElementById('resetView');
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+    // مشغل الصوتيات عناصر
+    const audio = document.getElementById('audio');
+    const trackNameEl = document.getElementById('track-name');
+    const playlistEl = document.getElementById('playlist');
+    const newTrackUrl = document.getElementById('newTrackUrl');
+    const newTrackName = document.getElementById('newTrackName');
+    const addTrackBtn = document.getElementById('addTrackBtn');
+    const savePlaylistBtn = document.getElementById('savePlaylistBtn');
+    const clearPlaylistBtn = document.getElementById('clearPlaylistBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
 
-// ----------------------------
-// DOM Elements
-// ----------------------------
-const addBtn=document.getElementById("addBtn");
-const siteList=document.getElementById("siteList");
-const sitesShort=document.getElementById("sitesShort");
-const siteNameInput=document.getElementById("siteName");
-const siteUrlInput=document.getElementById("siteUrl");
-const siteImageInput=document.getElementById("siteImage");
-const loginBtn=document.getElementById("loginBtn");
-const logoutBtn=document.getElementById("logoutBtn");
-const userPic=document.getElementById("userPic");
-const userNameEl=document.getElementById("userName");
-const chatBox=document.getElementById("chatBox");
-const chatInput=document.getElementById("chatMessage");
-const sendMsgBtn=document.getElementById("sendMsgBtn");
-const chatHint=document.getElementById("chatHint");
-const emojiPanel = document.getElementById("emojiPanel");
-const changeBgBtn = document.getElementById("changeBgBtn");
-const listPanel = document.getElementById('listPanel');
-const chatPanel = document.getElementById('chatPanel');
+    // حالة محلية
+    let currentUser = null;
+    let editId = null;
+    let tracks = []; // مصفوفة المسارات: { name, url }
+    let currentIndex = 0;
 
-// عناصر التحكم الجديدة
-const fontSizeRange = document.getElementById('fontSizeRange');
-const fontSizeValue = document.getElementById('fontSizeValue');
-const opacityRange = document.getElementById('opacityRange');
-const opacityValue = document.getElementById('opacityValue');
-const applyToImages = document.getElementById('applyToImages');
-const resetViewBtn = document.getElementById('resetView');
+    // ----------------------------
+    // Authentication (تسجيل الدخول بواسطة Google — مفصّل)
+    // ----------------------------
+    loginBtn.addEventListener("click", async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (e) {
+        alert("فشل تسجيل الدخول: " + e.message);
+      }
+    });
 
-let currentUser=null;
-let editId=null;
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+      } catch (e) {
+        console.warn('خطأ أثناء تسجيل الخروج', e);
+      }
+    });
 
-// ----------------------------
-// Authentication
-// ----------------------------
-loginBtn.addEventListener("click",async()=>{
-  try{ await signInWithPopup(auth,provider); }catch(e){ alert("فشل تسجيل الدخول: "+e.message); }
-});
-logoutBtn.addEventListener("click",async()=>{ await signOut(auth); });
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user || null;
+      loginBtn.style.display = user ? "none" : "inline-block";
+      logoutBtn.style.display = user ? "inline-block" : "none";
+      userPic.src = user?.photoURL || "";
+      userPic.style.display = user?.photoURL ? "inline-block" : "none";
+      userNameEl.textContent = user?.displayName || user?.email || "مستخدم";
+      userNameEl.style.display = user ? "inline-block" : "none";
+      chatHint.textContent = user ? "مسجّل الدخول — يمكنك إرسال الرسائل وإضافة المواقع." : "سجّل الدخول لتستطيع الكتابة.";
 
-onAuthStateChanged(auth, async (user) => {
-  currentUser = user || null;
-  loginBtn.style.display = user ? "none" : "inline-block";
-  logoutBtn.style.display = user ? "inline-block" : "none";
-  userPic.src = user?.photoURL || "";
-  userPic.style.display = user?.photoURL ? "inline-block" : "none";
-  userNameEl.textContent = user?.displayName || user?.email || "مستخدم";
-  userNameEl.style.display = user ? "inline-block" : "none";
-  chatHint.textContent = user ? "مسجّل الدخول — يمكنك إرسال الرسائل وإضافة المواقع." : "سجّل الدخول لتستطيع الكتابة.";
+      // عند تسجيل الدخول: استرجع إعدادات المستخدم (خلفية، لوحات، واجهة، وقائمة التشغيل)
+      if (user) {
+        try {
+          const userRef = doc(db, "users", user.uid);
+          const snap = await getDoc(userRef);
+          if (snap.exists()) {
+            const data = snap.data();
 
-  // عند تسجيل الدخول: استرجع إعدادات المستخدم (خاصة الخلفية & مواضع اللوحات و إعدادات الواجهة)
-  if(user){
-    try{
-      const userRef = doc(db, "users", user.uid);
-      const snap = await getDoc(userRef);
-      if(snap.exists()){
-        const data = snap.data();
-        // Background
-        if(data.settings && data.settings.background){
-          applyBackgroundFromObject(data.settings.background);
-        } else {
+            // الخلفية
+            if (data.settings && data.settings.background) {
+              applyBackgroundFromObject(data.settings.background);
+            } else {
+              applyBackgroundFromLocal();
+            }
+
+            // مواضع اللوحات
+            if (data.panels) {
+              applyPanelsFromObject(data.panels);
+            }
+
+            // إعدادات الواجهة
+            if (data.settings && data.settings.ui) {
+              const ui = data.settings.ui;
+              if (ui.fontSize) applyFontSize(ui.fontSize);
+              if (typeof ui.opacity !== 'undefined') applyOpacity(ui.opacity, ui.applyToImages);
+              syncUIControls(ui);
+            } else {
+              applyUISettingsFromLocal();
+            }
+
+            // قائمة التشغيل إذا وُجدت
+            if (data.settings && data.settings.playlist && Array.isArray(data.settings.playlist)) {
+              tracks = data.settings.playlist.slice();
+              renderPlaylist();
+              if (tracks.length > 0) loadTrack(0);
+            }
+
+          } else {
+            applyBackgroundFromLocal();
+            applyUISettingsFromLocal();
+            loadPlaylistFromLocal();
+          }
+        } catch (e) {
+          console.warn('خطأ استرجاع إعدادات المستخدم:', e);
           applyBackgroundFromLocal();
-        }
-        // Panels
-        if(data.panels) applyPanelsFromObject(data.panels);
-        // UI settings (حجم الخط و الشفافية)
-        if(data.settings && data.settings.ui){
-          const ui = data.settings.ui;
-          if(ui.fontSize) applyFontSize(ui.fontSize);
-          if(typeof ui.opacity !== 'undefined') applyOpacity(ui.opacity, ui.applyToImages);
-          // تأكد من مزامنة عناصر التحكم
-          syncUIControls(ui);
-        } else {
           applyUISettingsFromLocal();
+          loadPlaylistFromLocal();
         }
       } else {
-        // لا مستند في Firestore، fallback إلى localStorage
+        // لا مستخدم — استرجاع من localStorage
         applyBackgroundFromLocal();
         applyUISettingsFromLocal();
+        loadPlaylistFromLocal();
       }
-    }catch(e){ console.warn('خطأ استرجاع إعدادات المستخدم:', e); applyBackgroundFromLocal(); applyUISettingsFromLocal(); }
-  } else {
-    // لا مستخدم — طبق localStorage أو الافتراضي
-    applyBackgroundFromLocal();
-    applyUISettingsFromLocal();
-  }
-});
-
-// ----------------------------
-// Sites handling (Firestore)
-// ----------------------------
-const sitesCol = collection(db,"sites");
-onSnapshot(sitesCol, snapshot=>{
-  siteList.innerHTML=""; sitesShort.innerHTML="";
-  snapshot.forEach(docSnap=>{
-    const site=docSnap.data(); const id=docSnap.id;
-    const card=document.createElement("div"); card.className="card";
-    card.style.left=site.left||"0px"; card.style.top=site.top||"0px";
-    card.style.width=site.width||"200px"; card.style.height=site.height||"250px";
-    const img=document.createElement("img"); img.src=site.image||"https://via.placeholder.com/200x250";
-    img.onclick=()=>window.open(site.url,"_blank");
-    const content=document.createElement("div"); content.className="card-content";
-    const title=document.createElement("h3"); title.textContent=site.name;
-    const actions=document.createElement("div"); actions.className="actions";
-    const editBtn=document.createElement("button"); editBtn.className="edit"; editBtn.textContent="✏️ تعديل"; editBtn.onclick=()=>openEdit(id);
-    const deleteBtn=document.createElement("button"); deleteBtn.className="delete"; deleteBtn.textContent="🗑 حذف"; deleteBtn.onclick=()=>deleteDoc(doc(db,"sites",id));
-    actions.appendChild(editBtn); actions.appendChild(deleteBtn);
-    content.appendChild(title); content.appendChild(actions);
-    const dragHandle=document.createElement("div"); dragHandle.className="drag-handle"; dragHandle.title="اسحب"; dragHandle.textContent="⇅";
-    const resizeHandle=document.createElement("div"); resizeHandle.className="resize-handle";
-    card.appendChild(img); card.appendChild(content); card.appendChild(dragHandle); card.appendChild(resizeHandle);
-    enableCardDragResize(card,id);
-    siteList.appendChild(card);
-
-    const short=document.createElement("div"); short.className="site-item";
-    short.innerHTML=`<img src="${site.image||'https://via.placeholder.com/48x36'}"><a href="${site.url}" target="_blank">${site.name}</a>`;
-    sitesShort.appendChild(short);
-  });
-});
-
-// Add/Edit site
-addBtn.addEventListener("click",async()=>{
-  if(!currentUser){ alert("سجّل الدخول أولاً"); return; }
-  const name=siteNameInput.value.trim(); const url=siteUrlInput.value.trim();
-  if(!name||!url){ alert("املأ الاسم والرابط"); return; }
-  const image=siteImageInput.value.trim()||"";
-  if(editId){
-    await updateDoc(doc(db,"sites",editId),{name,url,image});
-    editId=null; addBtn.textContent="➕ إضافة";
-  }else{
-    await addDoc(sitesCol,{name,url,image,left:"0px",top:"0px",width:"200px",height:"250px"});
-  }
-  siteNameInput.value=""; siteUrlInput.value=""; siteImageInput.value="";
-});
-function openEdit(id){ editId=id; getDoc(doc(db,"sites",id)).then(snap=>{ const data=snap.data(); siteNameInput.value=data.name; siteUrlInput.value=data.url; siteImageInput.value=data.image||""; addBtn.textContent="💾 حفظ التعديل"; }); }
-
-// ----------------------------
-// Chat handling (Firestore)
-// ----------------------------
-const chatCol = collection(db,"chat");
-onSnapshot(query(chatCol, orderBy("timestamp")), snapshot=>{
-  chatBox.innerHTML="";
-  snapshot.forEach(docSnap=>{
-    const msg=docSnap.data();
-    const div=document.createElement("div"); div.className="msg "+(msg.uid===currentUser?.uid?"me":"other");
-    const userInfo = document.createElement("div"); userInfo.style.display="flex"; userInfo.style.alignItems="center"; userInfo.style.gap = "6px"; userInfo.style.marginBottom = "2px";
-    const img = document.createElement("img"); img.src = msg.photoURL || "https://via.placeholder.com/24"; img.style.width="24px"; img.style.height="24px"; img.style.borderRadius="50%"; img.style.objectFit="cover";
-    const name = document.createElement("span"); name.textContent = msg.displayName || "مستخدم"; name.style.fontSize="12px"; name.style.color = msg.uid===currentUser?.uid?"#fff":"#555";
-    userInfo.appendChild(img); userInfo.appendChild(name);
-    const textDiv = document.createElement("div"); textDiv.textContent = msg.text;
-    div.appendChild(userInfo); div.appendChild(textDiv);
-    div.style.maxWidth="70%"; div.style.marginBottom="6px"; div.style.clear="both"; div.style.padding="6px 10px"; div.style.borderRadius="12px"; div.style.wordWrap="break-word";
-    div.style.background = msg.uid===currentUser?.uid?"#2980b9":"#e0e0e0"; div.style.color = msg.uid===currentUser?.uid?"#fff":"#000";
-    div.style.float = msg.uid===currentUser?.uid?"right":"left";
-    chatBox.appendChild(div); chatBox.scrollTop=chatBox.scrollHeight;
-  });
-});
-
-sendMsgBtn.addEventListener("click",sendMsg);
-chatInput.addEventListener("keypress",e=>{ if(e.key==="Enter") sendMsg(); });
-async function sendMsg(){
-  if(!currentUser){ alert("سجّل الدخول أولاً"); return; }
-  const text=chatInput.value.trim(); if(!text) return;
-  await addDoc(chatCol,{text,uid:currentUser.uid,displayName: currentUser.displayName,photoURL: currentUser.photoURL,timestamp: new Date()});
-  chatInput.value="";
-}
-
-// ----------------------------
-// Card drag & resize (kept original logic, updates Firestore for card position/size)
-// ----------------------------
-function enableCardDragResize(card,id){
-  let offsetX=0,offsetY=0,isDragging=false;
-  let startWidth=0,startHeight=0,isResizing=false;
-  const dragHandle=card.querySelector(".drag-handle");
-  const resizeHandle=card.querySelector(".resize-handle");
-
-  dragHandle.addEventListener("mousedown",e=>{
-    isDragging=true;
-    offsetX=e.clientX-card.offsetLeft;
-    offsetY=e.clientY-card.offsetTop;
-    document.body.style.userSelect="none";
-  });
-  resizeHandle.addEventListener("mousedown",e=>{
-    isResizing=true;
-    startWidth=card.offsetWidth; startHeight=card.offsetHeight;
-    offsetX=e.clientX; offsetY=e.clientY;
-    document.body.style.userSelect="none";
-  });
-  document.addEventListener("mousemove",e=>{
-    if(isDragging){ card.style.left=e.clientX-offsetX+"px"; card.style.top=e.clientY-offsetY+"px"; }
-    if(isResizing){ card.style.width=Math.max(100,startWidth+(e.clientX-offsetX))+"px"; card.style.height=Math.max(120,startHeight+(e.clientY-offsetY))+"px"; }
-  });
-  document.addEventListener("mouseup",async()=>{
-    if(isDragging||isResizing){
-      try{
-        await updateDoc(doc(db,"sites",id),{left:card.style.left,top:card.style.top,width:card.style.width,height:card.style.height});
-      }catch(e){ console.warn('تعذر تحديث الموقع/الحجم في Firestore:',e); }
-      isDragging=false; isResizing=false; document.body.style.userSelect="auto";
-    }
-  });
-}
-
-// ----------------------------
-// Panels drag & resize and save to Firestore (users/<uid>.settings.background & users/<uid>.panels)
-// ----------------------------
-function enablePanelDragResize(panel, storageKey){
-  const dragHandle = panel.querySelector('.panel-drag-handle');
-  const resizeHandles = panel.querySelectorAll('.panel-resize-handle');
-
-  let startX=0,startY=0,startLeft=0,startTop=0,startWidth=0,startHeight=0;
-  let isDragging=false,isResizing=false;
-
-  dragHandle.addEventListener('mousedown', e=>{
-    isDragging=true;
-    startX=e.clientX; startY=e.clientY;
-    startLeft = parseInt(panel.style.left || panel.offsetLeft);
-    startTop = parseInt(panel.style.top || panel.offsetTop);
-    document.body.style.userSelect='none';
-  });
-
-  resizeHandles.forEach(handle=>{
-    handle.addEventListener('mousedown', e=>{
-      isResizing=true;
-      startX=e.clientX; startY=e.clientY;
-      startWidth = panel.offsetWidth; startHeight = panel.offsetHeight;
-      document.body.style.userSelect='none';
     });
-  });
 
-  document.addEventListener('mousemove', e=>{
-    if(isDragging){
-      const dx = e.clientX - startX; const dy = e.clientY - startY;
-      panel.style.left = (startLeft + dx) + 'px';
-      panel.style.top = (startTop + dy) + 'px';
-    }
-    if(isResizing){
-      const dx = e.clientX - startX; const dy = e.clientY - startY;
-      panel.style.width = Math.max(180, startWidth + dx) + 'px';
-      panel.style.height = Math.max(140, startHeight + dy) + 'px';
-      if(panel.id==='chatPanel') chatBox.style.height = (panel.clientHeight - 140) + 'px';
-    }
-  });
+    // ----------------------------
+    // Sites handling (Firestore) — مفصّل
+    // ----------------------------
+    const sitesCol = collection(db, "sites");
 
-  document.addEventListener('mouseup', async ()=>{
-    if(isDragging||isResizing){
-      // حفظ الحالة في Firestore تحت المستخدم إن كان مسجلاً، وإلا في localStorage
-      const panelState = { left: panel.style.left || panel.offsetLeft + 'px', top: panel.style.top || panel.offsetTop + 'px', width: panel.style.width || panel.offsetWidth + 'px', height: panel.style.height || panel.offsetHeight + 'px' };
-      if(currentUser){
-        try{
+    onSnapshot(sitesCol, snapshot => {
+      siteList.innerHTML = "";
+      sitesShort.innerHTML = "";
+
+      snapshot.forEach(docSnap => {
+        const site = docSnap.data();
+        const id = docSnap.id;
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.style.left = site.left || "0px";
+        card.style.top = site.top || "0px";
+        card.style.width = site.width || "200px";
+        card.style.height = site.height || "250px";
+
+        const img = document.createElement("img");
+        img.src = site.image || "https://via.placeholder.com/200x250";
+        img.onclick = () => window.open(site.url, "_blank");
+
+        const content = document.createElement("div");
+        content.className = "card-content";
+
+        const title = document.createElement("h3");
+        title.textContent = site.name;
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const editBtn = document.createElement("button");
+        editBtn.className = "edit";
+        editBtn.textContent = "✏️ تعديل";
+        editBtn.onclick = () => openEdit(id);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "delete";
+        deleteBtn.textContent = "🗑 حذف";
+        deleteBtn.onclick = () => deleteDoc(doc(db, "sites", id));
+
+        actions.appendChild(editBtn);
+        actions.appendChild(deleteBtn);
+
+        content.appendChild(title);
+        content.appendChild(actions);
+
+        const dragHandle = document.createElement("div");
+        dragHandle.className = "drag-handle";
+        dragHandle.title = "اسحب";
+        dragHandle.textContent = "⇅";
+
+        const resizeHandle = document.createElement("div");
+        resizeHandle.className = "resize-handle";
+
+        card.appendChild(img);
+        card.appendChild(content);
+        card.appendChild(dragHandle);
+        card.appendChild(resizeHandle);
+
+        enableCardDragResize(card, id);
+
+        siteList.appendChild(card);
+
+        const short = document.createElement("div");
+        short.className = "site-item";
+        short.innerHTML = `<img src="${site.image || 'https://via.placeholder.com/48x36'}"><a href="${site.url}" target="_blank">${site.name}</a>`;
+        sitesShort.appendChild(short);
+      });
+    });
+
+    // إضافة/تحرير مواقع
+    addBtn.addEventListener("click", async () => {
+      if (!currentUser) { alert("سجّل الدخول أولاً"); return; }
+      const name = siteNameInput.value.trim();
+      const url = siteUrlInput.value.trim();
+      if (!name || !url) { alert("املأ الاسم والرابط"); return; }
+      const image = siteImageInput.value.trim() || "";
+
+      if (editId) {
+        try {
+          await updateDoc(doc(db, "sites", editId), { name, url, image });
+          editId = null;
+          addBtn.textContent = "➕ إضافة";
+        } catch (e) {
+          console.warn('خطأ تحديث الموقع', e);
+        }
+      } else {
+        try {
+          await addDoc(sitesCol, { name, url, image, left: "0px", top: "0px", width: "200px", height: "250px" });
+        } catch (e) {
+          console.warn('خطأ إضافة الموقع', e);
+        }
+      }
+
+      siteNameInput.value = "";
+      siteUrlInput.value = "";
+      siteImageInput.value = "";
+    });
+
+    function openEdit(id) {
+      getDoc(doc(db, "sites", id)).then(snap => {
+        const data = snap.data();
+        siteNameInput.value = data.name;
+        siteUrlInput.value = data.url;
+        siteImageInput.value = data.image || "";
+        addBtn.textContent = "💾 حفظ التعديل";
+        editId = id;
+      }).catch(e => console.warn('خطأ فتح التعديل', e));
+    }
+
+    // ----------------------------
+    // Chat handling (Firestore)
+    // ----------------------------
+    const chatCol = collection(db, "chat");
+
+    onSnapshot(query(chatCol, orderBy("timestamp")), snapshot => {
+      chatBox.innerHTML = "";
+      snapshot.forEach(docSnap => {
+        const msg = docSnap.data();
+
+        const div = document.createElement("div");
+        div.className = "msg " + (msg.uid === currentUser?.uid ? "me" : "other");
+
+        const userInfo = document.createElement("div");
+        userInfo.style.display = "flex";
+        userInfo.style.alignItems = "center";
+        userInfo.style.gap = "6px";
+        userInfo.style.marginBottom = "2px";
+
+        const img = document.createElement("img");
+        img.src = msg.photoURL || "https://via.placeholder.com/24";
+        img.style.width = "24px";
+        img.style.height = "24px";
+        img.style.borderRadius = "50%";
+        img.style.objectFit = "cover";
+
+        const name = document.createElement("span");
+        name.textContent = msg.displayName || "مستخدم";
+        name.style.fontSize = "12px";
+        name.style.color = msg.uid === currentUser?.uid ? "#fff" : "#555";
+
+        userInfo.appendChild(img);
+        userInfo.appendChild(name);
+
+        const textDiv = document.createElement("div");
+        textDiv.textContent = msg.text;
+
+        div.appendChild(userInfo);
+        div.appendChild(textDiv);
+
+        div.style.maxWidth = "70%";
+        div.style.marginBottom = "6px";
+        div.style.clear = "both";
+        div.style.padding = "6px 10px";
+        div.style.borderRadius = "12px";
+        div.style.wordWrap = "break-word";
+        div.style.background = msg.uid === currentUser?.uid ? "#2980b9" : "#e0e0e0";
+        div.style.color = msg.uid === currentUser?.uid ? "#fff" : "#000";
+        div.style.float = msg.uid === currentUser?.uid ? "right" : "left";
+
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+    });
+
+    sendMsgBtn.addEventListener("click", sendMsg);
+
+    chatInput.addEventListener("keypress", e => { if (e.key === "Enter") sendMsg(); });
+
+    async function sendMsg() {
+      if (!currentUser) { alert("سجّل الدخول أولاً"); return; }
+      const text = chatInput.value.trim();
+      if (!text) return;
+      try {
+        await addDoc(chatCol, { text, uid: currentUser.uid, displayName: currentUser.displayName, photoURL: currentUser.photoURL, timestamp: new Date() });
+        chatInput.value = "";
+      } catch (e) {
+        console.warn('خطأ إرسال الرسالة', e);
+      }
+    }
+
+    // ----------------------------
+    // Card drag & resize — ausführlich
+    // ----------------------------
+    function enableCardDragResize(card, id) {
+      // حالات السحب والتغيير
+      let offsetX = 0;
+      let offsetY = 0;
+      let isDragging = false;
+
+      let startWidth = 0;
+      let startHeight = 0;
+      let isResizing = false;
+
+      const dragHandle = card.querySelector(".drag-handle");
+      const resizeHandle = card.querySelector(".resize-handle");
+
+      // بدء السحب
+      dragHandle.addEventListener("mousedown", e => {
+        isDragging = true;
+        offsetX = e.clientX - card.offsetLeft;
+        offsetY = e.clientY - card.offsetTop;
+        document.body.style.userSelect = "none";
+      });
+
+      // بدء التغيير في الحجم
+      resizeHandle.addEventListener("mousedown", e => {
+        isResizing = true;
+        startWidth = card.offsetWidth;
+        startHeight = card.offsetHeight;
+        offsetX = e.clientX;
+        offsetY = e.clientY;
+        document.body.style.userSelect = "none";
+      });
+
+      document.addEventListener("mousemove", e => {
+        if (isDragging) {
+          card.style.left = e.clientX - offsetX + "px";
+          card.style.top = e.clientY - offsetY + "px";
+        }
+
+        if (isResizing) {
+          card.style.width = Math.max(100, startWidth + (e.clientX - offsetX)) + "px";
+          card.style.height = Math.max(120, startHeight + (e.clientY - offsetY)) + "px";
+        }
+      });
+
+      document.addEventListener("mouseup", async () => {
+        if (isDragging || isResizing) {
+          try {
+            await updateDoc(doc(db, "sites", id), { left: card.style.left, top: card.style.top, width: card.style.width, height: card.style.height });
+          } catch (e) {
+            console.warn('تعذر تحديث الموقع/الحجم في Firestore:', e);
+          }
+          isDragging = false;
+          isResizing = false;
+          document.body.style.userSelect = "auto";
+        }
+      });
+    }
+
+    // ----------------------------
+    // Panels drag & resize and save state to Firestore/localStorage — مفصّل
+    // ----------------------------
+    function enablePanelDragResize(panel, storageKey) {
+      const dragHandle = panel.querySelector('.panel-drag-handle');
+      const resizeHandles = panel.querySelectorAll('.panel-resize-handle');
+
+      let startX = 0;
+      let startY = 0;
+      let startLeft = 0;
+      let startTop = 0;
+      let startWidth = 0;
+      let startHeight = 0;
+
+      let isDragging = false;
+      let isResizing = false;
+
+      // عند بدء السحب
+      dragHandle.addEventListener('mousedown', e => {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = parseInt(panel.style.left || panel.offsetLeft);
+        startTop = parseInt(panel.style.top || panel.offsetTop);
+        document.body.style.userSelect = 'none';
+      });
+
+      // عند بدء تغيير الحجم
+      resizeHandles.forEach(handle => {
+        handle.addEventListener('mousedown', e => {
+          isResizing = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          startWidth = panel.offsetWidth;
+          startHeight = panel.offsetHeight;
+          document.body.style.userSelect = 'none';
+        });
+      });
+
+      document.addEventListener('mousemove', e => {
+        if (isDragging) {
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          panel.style.left = (startLeft + dx) + 'px';
+          panel.style.top = (startTop + dy) + 'px';
+        }
+
+        if (isResizing) {
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          panel.style.width = Math.max(180, startWidth + dx) + 'px';
+          panel.style.height = Math.max(140, startHeight + dy) + 'px';
+          if (panel.id === 'chatPanel') chatBox.style.height = (panel.clientHeight - 140) + 'px';
+        }
+      });
+
+      document.addEventListener('mouseup', async () => {
+        if (isDragging || isResizing) {
+          const panelState = {
+            left: panel.style.left || panel.offsetLeft + 'px',
+            top: panel.style.top || panel.offsetTop + 'px',
+            width: panel.style.width || panel.offsetWidth + 'px',
+            height: panel.style.height || panel.offsetHeight + 'px'
+          };
+
+          if (currentUser) {
+            try {
+              const userRef = doc(db, 'users', currentUser.uid);
+              const snap = await getDoc(userRef);
+              let base = {};
+              if (snap.exists()) base = snap.data();
+              const panels = (base.panels) ? base.panels : {};
+              panels[storageKey] = panelState;
+              await setDoc(userRef, { panels }, { merge: true });
+            } catch (e) {
+              console.warn('تعذر حفظ حالة اللوحة في Firestore', e);
+              savePanelState(storageKey, panel);
+            }
+          } else {
+            savePanelState(storageKey, panel);
+          }
+        }
+
+        isDragging = false;
+        isResizing = false;
+        document.body.style.userSelect = 'auto';
+      });
+    }
+
+    function savePanelState(key, panel) {
+      try {
+        const data = JSON.parse(localStorage.getItem('panelPositions') || '{}');
+        data[key] = { left: panel.style.left || panel.offsetLeft + 'px', top: panel.style.top || panel.offsetTop + 'px', width: panel.style.width || panel.offsetWidth + 'px', height: panel.style.height || panel.offsetHeight + 'px' };
+        localStorage.setItem('panelPositions', JSON.stringify(data));
+      } catch (e) {
+        console.warn('تعذر حفظ حالة اللوحة محلياً', e);
+      }
+    }
+
+    function applySavedPanels() {
+      try {
+        const data = JSON.parse(localStorage.getItem('panelPositions') || '{}');
+        if (data.listPanel) {
+          listPanel.style.position = 'absolute';
+          listPanel.style.left = data.listPanel.left;
+          listPanel.style.top = data.listPanel.top;
+          listPanel.style.width = data.listPanel.width;
+          listPanel.style.height = data.listPanel.height;
+        }
+        if (data.chatPanel) {
+          chatPanel.style.position = 'absolute';
+          chatPanel.style.left = data.chatPanel.left || chatPanel.style.left;
+          chatPanel.style.top = data.chatPanel.top || chatPanel.style.top;
+          chatPanel.style.width = data.chatPanel.width;
+          chatPanel.style.height = data.chatPanel.height;
+          chatBox.style.height = (chatPanel.clientHeight - 140) + 'px';
+        }
+      } catch (e) {
+        console.warn('تعذر قراءة حالة اللوحات من localStorage', e);
+      }
+    }
+
+    function applyPanelsFromObject(obj) {
+      try {
+        if (obj.listPanel) {
+          listPanel.style.position = 'absolute';
+          listPanel.style.left = obj.listPanel.left;
+          listPanel.style.top = obj.listPanel.top;
+          listPanel.style.width = obj.listPanel.width;
+          listPanel.style.height = obj.listPanel.height;
+        }
+        if (obj.chatPanel) {
+          chatPanel.style.position = 'absolute';
+          chatPanel.style.left = obj.chatPanel.left || chatPanel.style.left;
+          chatPanel.style.top = obj.chatPanel.top || chatPanel.style.top;
+          chatPanel.style.width = obj.chatPanel.width;
+          chatPanel.style.height = obj.chatPanel.height;
+          chatBox.style.height = (chatPanel.clientHeight - 140) + 'px';
+        }
+      } catch (e) {
+        console.warn('خطأ تطبيق حالة اللوحات من Firestore', e);
+      }
+    }
+
+    // تفعيل السحب/التغيير
+    applySavedPanels();
+    enablePanelDragResize(listPanel, 'listPanel');
+    enablePanelDragResize(chatPanel, 'chatPanel');
+
+    // ----------------------------
+    // Emoji panel toggle
+    // ----------------------------
+    function toggleEmojiPanel() {
+      if (emojiPanel.style.display === 'block') {
+        emojiPanel.style.display = 'none';
+      } else {
+        emojiPanel.style.display = 'block';
+        if (!emojiPanel.hasChildNodes()) {
+          const emojis = "😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤐 🤨 😐 😑 😶 😏".split(" ");
+          emojis.forEach(e => {
+            const span = document.createElement('span');
+            span.textContent = e;
+            span.onclick = () => { chatInput.value += e; emojiPanel.style.display = 'none'; };
+            emojiPanel.appendChild(span);
+          });
+        }
+      }
+    }
+
+    // ----------------------------
+    // Background: apply & save
+    // ----------------------------
+    function applyBackgroundFromObject(bgObj) {
+      try {
+        if (!bgObj) return;
+        if (bgObj.type === 'color') {
+          document.body.style.background = bgObj.value;
+        } else if (bgObj.type === 'image') {
+          document.body.style.background = `url(${bgObj.value}) no-repeat center center fixed`;
+          document.body.style.backgroundSize = 'cover';
+        }
+      } catch (e) {
+        console.warn('applyBackgroundFromObject error', e);
+      }
+    }
+
+    function applyBackgroundFromLocal() {
+      try {
+        const raw = localStorage.getItem('backgroundSetting');
+        if (raw) {
+          const bgObj = JSON.parse(raw);
+          applyBackgroundFromObject(bgObj);
+        } else {
+          document.body.style.background = "linear-gradient(180deg,#eef6fb,#f4f6f9)";
+        }
+      } catch (e) {
+        console.warn('applyBackgroundFromLocal error', e);
+        document.body.style.background = "linear-gradient(180deg,#eef6fb,#f4f6f9)";
+      }
+    }
+
+    async function saveBackgroundSetting(bgObj) {
+      try {
+        localStorage.setItem('backgroundSetting', JSON.stringify(bgObj));
+      } catch (e) {
+        console.warn('تعذر حفظ الخلفية محليا', e);
+      }
+
+      if (currentUser) {
+        try {
           const userRef = doc(db, 'users', currentUser.uid);
           const snap = await getDoc(userRef);
           let base = {};
-          if(snap.exists()) base = snap.data();
-          const panels = (base.panels) ? base.panels : {};
-          panels[storageKey] = panelState;
-          await setDoc(userRef, { panels }, { merge:true });
-        }catch(e){ console.warn('تعذر حفظ حالة اللوحة في Firestore',e); savePanelState(storageKey,panel); }
-      } else {
-        savePanelState(storageKey,panel);
+          if (snap.exists()) base = snap.data();
+          const settings = base.settings || {};
+          settings.background = bgObj;
+          await setDoc(userRef, { settings }, { merge: true });
+        } catch (e) {
+          console.warn('تعذر حفظ الخلفية في Firestore', e);
+        }
       }
     }
-    isDragging=false; isResizing=false; document.body.style.userSelect='auto';
-  });
-}
 
-function savePanelState(key, panel){
-  try{
-    const data = JSON.parse(localStorage.getItem('panelPositions')||'{}');
-    data[key] = { left: panel.style.left || panel.offsetLeft + 'px', top: panel.style.top || panel.offsetTop + 'px', width: panel.style.width || panel.offsetWidth + 'px', height: panel.style.height || panel.offsetHeight + 'px' };
-    localStorage.setItem('panelPositions', JSON.stringify(data));
-  }catch(e){ console.warn('تعذر حفظ حالة اللوحة محلياً', e); }
-}
+    changeBgBtn.addEventListener('click', async () => {
+      const choice = prompt('اكتب "color" لاختيار لون (مثال: #ffffff) أو "image" لوضع رابط صورة للخلفية:');
+      if (!choice) return;
+      if (choice === 'color') {
+        const color = prompt('أدخل قيمة اللون (مثال: #2c3e50 أو rgb(...) ):', '#2c3e50');
+        if (!color) return;
+        document.body.style.background = color;
+        await saveBackgroundSetting({ type: 'color', value: color });
+        alert('تم حفظ اللون كخلفية.');
+      } else if (choice === 'image') {
+        const url = prompt('ضع رابط الصورة للخلفية (مثال: https://example.com/bg.jpg):');
+        if (!url) return;
+        document.body.style.background = `url(${url}) no-repeat center center fixed`;
+        document.body.style.backgroundSize = 'cover';
+        await saveBackgroundSetting({ type: 'image', value: url });
+        alert('تم حفظ صورة الخلفية.');
+      } else {
+        alert('خيار غير مدعوم، اكتب "color" أو "image".');
+      }
+    });
 
-function applySavedPanels(){
-  try{
-    const data = JSON.parse(localStorage.getItem('panelPositions')||'{}');
-    if(data.listPanel){ listPanel.style.position='absolute'; listPanel.style.left=data.listPanel.left; listPanel.style.top=data.listPanel.top; listPanel.style.width=data.listPanel.width; listPanel.style.height=data.listPanel.height; }
-    if(data.chatPanel){ chatPanel.style.position='absolute'; chatPanel.style.left=data.chatPanel.left||chatPanel.style.left; chatPanel.style.top=data.chatPanel.top||chatPanel.style.top; chatPanel.style.width=data.chatPanel.width; chatPanel.style.height=data.chatPanel.height; chatBox.style.height = (chatPanel.clientHeight - 140) + 'px'; }
-  }catch(e){ console.warn('تعذر قراءة حالة اللوحات من localStorage', e); }
-}
-
-function applyPanelsFromObject(obj){
-  try{
-    if(obj.listPanel){ listPanel.style.position='absolute'; listPanel.style.left = obj.listPanel.left; listPanel.style.top = obj.listPanel.top; listPanel.style.width = obj.listPanel.width; listPanel.style.height = obj.listPanel.height; }
-    if(obj.chatPanel){ chatPanel.style.position='absolute'; chatPanel.style.left = obj.chatPanel.left || chatPanel.style.left; chatPanel.style.top = obj.chatPanel.top || chatPanel.style.top; chatPanel.style.width = obj.chatPanel.width; chatPanel.style.height = obj.chatPanel.height; chatBox.style.height = (chatPanel.clientHeight - 140) + 'px'; }
-  }catch(e){ console.warn('خطأ تطبيق حالة اللوحات من Firestore', e); }
-}
-
-// تفعيل السحب/التغيير
-applySavedPanels();
-enablePanelDragResize(listPanel,'listPanel');
-enablePanelDragResize(chatPanel,'chatPanel');
-
-// ----------------------------
-// Emoji panel toggle
-// ----------------------------
-function toggleEmojiPanel(){
-  if(emojiPanel.style.display==='block'){ emojiPanel.style.display='none'; }
-  else{
-    emojiPanel.style.display='block';
-    if(!emojiPanel.hasChildNodes()){
-      const emojis = "😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤐 🤨 😐 😑 😶 😏".split(" ");
-      emojis.forEach(e=>{ const span=document.createElement('span'); span.textContent=e; span.onclick=()=>{ chatInput.value += e; emojiPanel.style.display='none'; }; emojiPanel.appendChild(span); });
+    // ----------------------------
+    // UI settings: font size & opacity
+    // ----------------------------
+    function applyFontSize(size) {
+      try {
+        document.documentElement.style.setProperty('--base-font-size', (typeof size === 'number' ? size : parseInt(size)) + 'px');
+        fontSizeValue.textContent = (typeof size === 'number' ? size : parseInt(size)) + 'px';
+      } catch (e) {
+        console.warn('applyFontSize error', e);
+      }
     }
-  }
-}
 
-// ----------------------------
-// Background: apply & save (color or image)
-// Structure in Firestore:
-// users/<uid>.settings.background = { type: 'color'|'image', value: '#ffffff' OR 'https://...' }
-// Also keep a copy in localStorage under key 'backgroundSetting' as fallback.
-// ----------------------------
-function applyBackgroundFromObject(bgObj){
-  try{
-    if(!bgObj) return;
-    if(bgObj.type === 'color'){
-      document.body.style.background = bgObj.value;
-    } else if(bgObj.type === 'image'){
-      document.body.style.background = `url(${bgObj.value}) no-repeat center center fixed`;
-      document.body.style.backgroundSize = 'cover';
-    } else {
-      // unknown: do nothing
+    function applyOpacity(val, applyImgs = false) {
+      try {
+        const opacity = parseFloat(val);
+        document.documentElement.style.setProperty('--card-opacity', opacity);
+        document.documentElement.style.setProperty('--panel-opacity', opacity);
+        if (applyImgs) {
+          document.documentElement.style.setProperty('--img-opacity', opacity);
+        } else {
+          document.documentElement.style.setProperty('--img-opacity', 1);
+        }
+        opacityValue.textContent = Math.round(opacity * 100) + '%';
+        applyToImages.checked = !!applyImgs;
+      } catch (e) {
+        console.warn('applyOpacity error', e);
+      }
     }
-  }catch(e){ console.warn('applyBackgroundFromObject error', e); }
-}
 
-function applyBackgroundFromLocal(){
-  try{
-    const raw = localStorage.getItem('backgroundSetting');
-    if(raw){
-      const bgObj = JSON.parse(raw);
-      applyBackgroundFromObject(bgObj);
-    } else {
-      // default linear gradient kept in CSS
-      document.body.style.background = "linear-gradient(180deg,#eef6fb,#f4f6f9)";
+    async function saveUISettings(obj) {
+      try {
+        const cur = JSON.parse(localStorage.getItem('uiSettings') || '{}');
+        const merged = Object.assign(cur, obj);
+        localStorage.setItem('uiSettings', JSON.stringify(merged));
+      } catch (e) {
+        console.warn('تعذر حفظ إعدادات الواجهة محلياً', e);
+      }
+
+      if (currentUser) {
+        try {
+          const userRef = doc(db, 'users', currentUser.uid);
+          const snap = await getDoc(userRef);
+          let base = {};
+          if (snap.exists()) base = snap.data();
+          const settings = base.settings || {};
+          settings.ui = Object.assign(settings.ui || {}, obj);
+          await setDoc(userRef, { settings }, { merge: true });
+        } catch (e) {
+          console.warn('تعذر حفظ إعدادات الواجهة في Firestore', e);
+        }
+      }
     }
-  }catch(e){ console.warn('applyBackgroundFromLocal error', e); document.body.style.background = "linear-gradient(180deg,#eef6fb,#f4f6f9)"; }
-}
 
-// ----------------------------
-// UI settings: font size & opacity
-// stores in localStorage under 'uiSettings' and in Firestore under users/<uid>.settings.ui
-// ui = { fontSize: 14, opacity: 1, applyToImages: false }
-// ----------------------------
-function applyFontSize(size){
-  try{
-    document.documentElement.style.setProperty('--base-font-size', (typeof size === 'number' ? size : parseInt(size)) + 'px');
-    fontSizeValue.textContent = (typeof size === 'number' ? size : parseInt(size)) + 'px';
-  }catch(e){ console.warn('applyFontSize error', e); }
-}
-
-function applyOpacity(val, applyImgs=false){
-  try{
-    const opacity = parseFloat(val);
-    document.documentElement.style.setProperty('--card-opacity', opacity);
-    document.documentElement.style.setProperty('--panel-opacity', opacity);
-    if(applyImgs){
-      document.documentElement.style.setProperty('--img-opacity', opacity);
-    } else {
-      document.documentElement.style.setProperty('--img-opacity', 1);
+    function applyUISettingsFromLocal() {
+      try {
+        const raw = localStorage.getItem('uiSettings');
+        if (raw) {
+          const ui = JSON.parse(raw);
+          if (ui.fontSize) applyFontSize(ui.fontSize);
+          if (typeof ui.opacity !== 'undefined') applyOpacity(ui.opacity, ui.applyToImages);
+          syncUIControls(ui);
+        } else {
+          applyFontSize(14);
+          applyOpacity(1, false);
+          syncUIControls({ fontSize: 14, opacity: 1, applyToImages: false });
+        }
+      } catch (e) {
+        console.warn('applyUISettingsFromLocal error', e);
+        applyFontSize(14);
+        applyOpacity(1, false);
+      }
     }
-    opacityValue.textContent = Math.round(opacity * 100) + '%';
-    applyToImages.checked = !!applyImgs;
-  }catch(e){ console.warn('applyOpacity error', e); }
-}
 
-async function saveUISettings(obj){
-  try{
-    // save locally
-    const cur = JSON.parse(localStorage.getItem('uiSettings')||'{}');
-    const merged = Object.assign(cur, obj);
-    localStorage.setItem('uiSettings', JSON.stringify(merged));
-  }catch(e){ console.warn('تعذر حفظ إعدادات الواجهة محلياً', e); }
+    function syncUIControls(ui) {
+      try {
+        if (typeof ui.fontSize !== 'undefined') fontSizeRange.value = ui.fontSize;
+        if (typeof ui.opacity !== 'undefined') opacityRange.value = ui.opacity;
+        applyToImages.checked = !!ui.applyToImages;
+        fontSizeValue.textContent = (ui.fontSize || 14) + 'px';
+        opacityValue.textContent = Math.round((typeof ui.opacity !== 'undefined' ? ui.opacity : 1) * 100) + '%';
+      } catch (e) {
+        console.warn('syncUIControls error', e);
+      }
+    }
 
-  if(currentUser){
-    try{
-      const userRef = doc(db, 'users', currentUser.uid);
-      const snap = await getDoc(userRef);
-      let base = {};
-      if(snap.exists()) base = snap.data();
-      const settings = base.settings || {};
-      settings.ui = Object.assign(settings.ui || {}, obj);
-      await setDoc(userRef, { settings }, { merge:true });
-    }catch(e){ console.warn('تعذر حفظ إعدادات الواجهة في Firestore', e); }
-  }
-}
+    fontSizeRange.addEventListener('input', e => {
+      const val = parseInt(e.target.value);
+      applyFontSize(val);
+      saveUISettings({ fontSize: val });
+    });
 
-function applyUISettingsFromLocal(){
-  try{
-    const raw = localStorage.getItem('uiSettings');
-    if(raw){
-      const ui = JSON.parse(raw);
-      if(ui.fontSize) applyFontSize(ui.fontSize);
-      if(typeof ui.opacity !== 'undefined') applyOpacity(ui.opacity, ui.applyToImages);
-      syncUIControls(ui);
-    } else {
-      // قيم افتراضية
+    opacityRange.addEventListener('input', e => {
+      const val = parseFloat(e.target.value);
+      const applyImgs = applyToImages.checked;
+      applyOpacity(val, applyImgs);
+      saveUISettings({ opacity: val, applyToImages: applyImgs });
+    });
+
+    applyToImages.addEventListener('change', () => {
+      const val = parseFloat(opacityRange.value);
+      applyOpacity(val, applyToImages.checked);
+      saveUISettings({ opacity: val, applyToImages: applyToImages.checked });
+    });
+
+    resetViewBtn.addEventListener('click', () => {
       applyFontSize(14);
       applyOpacity(1, false);
-      syncUIControls({ fontSize:14, opacity:1, applyToImages:false });
+      saveUISettings({ fontSize: 14, opacity: 1, applyToImages: false });
+      alert('تمت إعادة إعدادات العرض إلى الافتراضي.');
+    });
+
+    // ----------------------------
+    // Audio player logic (مطوّل) — يدعم تحويل روابط Google Drive وعرض القائمة
+    // ----------------------------
+    function isGoogleDriveViewLink(url) {
+      try {
+        const u = new URL(url);
+        return (u.hostname.includes('drive.google.com') && (u.pathname.includes('/file/d/') || u.pathname.includes('/open')));
+      } catch (e) {
+        return false;
+      }
     }
-  }catch(e){ console.warn('applyUISettingsFromLocal error', e); applyFontSize(14); applyOpacity(1,false); }
-}
 
-function syncUIControls(ui){
-  try{
-    if(typeof ui.fontSize !== 'undefined') fontSizeRange.value = ui.fontSize;
-    if(typeof ui.opacity !== 'undefined') opacityRange.value = ui.opacity;
-    applyToImages.checked = !!ui.applyToImages;
-    fontSizeValue.textContent = (ui.fontSize||14) + 'px';
-    opacityValue.textContent = Math.round((typeof ui.opacity !== 'undefined' ? ui.opacity : 1) * 100) + '%';
-  }catch(e){ console.warn('syncUIControls error', e); }
-}
+    function driveViewToDirect(url) {
+      try {
+        const u = new URL(url);
+        const m = u.pathname.match(/\/d\/(.*?)\//);
+        if (m && m[1]) return `https://docs.google.com/uc?export=download&id=${m[1]}`;
+        if (u.searchParams.get('id')) return `https://docs.google.com/uc?export=download&id=${u.searchParams.get('id')}`;
+        return url;
+      } catch (e) {
+        return url;
+      }
+    }
 
-// Event listeners for view controls
-fontSizeRange.addEventListener('input', e=>{
-  const val = parseInt(e.target.value);
-  applyFontSize(val);
-  saveUISettings({ fontSize: val });
-});
+    function renderPlaylist() {
+      playlistEl.innerHTML = '';
+      tracks.forEach((t, idx) => {
+        const li = document.createElement('li');
 
-opacityRange.addEventListener('input', e=>{
-  const val = parseFloat(e.target.value);
-  const applyImgs = applyToImages.checked;
-  applyOpacity(val, applyImgs);
-  saveUISettings({ opacity: val, applyToImages: applyImgs });
-});
+        const left = document.createElement('div');
+        left.style.flex = '1';
+        left.style.display = 'flex';
+        left.style.flexDirection = 'column';
 
-applyToImages.addEventListener('change', ()=>{
-  const val = parseFloat(opacityRange.value);
-  applyOpacity(val, applyToImages.checked);
-  saveUISettings({ opacity: val, applyToImages: applyToImages.checked });
-});
+        const title = document.createElement('div');
+        title.textContent = t.name || `ملف ${idx + 1}`;
+        title.style.cursor = 'pointer';
+        title.onclick = () => { currentIndex = idx; loadTrack(currentIndex); };
 
-resetViewBtn.addEventListener('click', ()=>{
-  // إعادة للقيم الافتراضية
-  applyFontSize(14);
-  applyOpacity(1,false);
-  saveUISettings({ fontSize:14, opacity:1, applyToImages:false });
-  alert('تمت إعادة إعدادات العرض إلى الافتراضي.');
-});
+        const urlDiv = document.createElement('div');
+        urlDiv.textContent = t.url;
+        urlDiv.style.fontSize = '12px';
+        urlDiv.style.color = 'var(--muted)';
+        urlDiv.style.wordBreak = 'break-all';
 
-// ----------------------------
-// UI flow: عند الضغط على زر تغيير الخلفية
-// ----------------------------
-changeBgBtn.addEventListener('click', async ()=>{
-  // عرض خيار بسيط: لون أم صورة؟
-  const choice = prompt('اكتب "color" لاختيار لون (مثال: #ffffff) أو "image" لوضع رابط صورة للخلفية:').trim().toLowerCase();
-  if(!choice) return;
-  if(choice === 'color'){
-    const color = prompt('أدخل قيمة اللون (مثال: #2c3e50 أو rgb(...) ):', '#2c3e50');
-    if(!color) return;
-    // تطبيق وحفظ
-    document.body.style.background = color;
-    await saveBackgroundSetting({ type:'color', value: color });
-    alert('تم حفظ اللون كخلفية.');
-  } else if(choice === 'image'){
-    const url = prompt('ضع رابط الصورة للخلفية (مثال: https://example.com/bg.jpg):');
-    if(!url) return;
-    document.body.style.background = `url(${url}) no-repeat center center fixed`;
-    document.body.style.backgroundSize = 'cover';
-    await saveBackgroundSetting({ type:'image', value: url });
-    alert('تم حفظ صورة الخلفية.');
-  } else {
-    alert('خيار غير مدعوم، اكتب "color" أو "image".');
-  }
-});
+        left.appendChild(title);
+        left.appendChild(urlDiv);
 
-// Helper to save background setting (both Firestore and localStorage)
-async function saveBackgroundSetting(bgObj){
-  try{
-    // save locally always
-    localStorage.setItem('backgroundSetting', JSON.stringify(bgObj));
-  }catch(e){ console.warn('تعذر حفظ الخلفية محليا', e); }
+        const actions = document.createElement('div');
 
-  if(currentUser){
-    try{
-      const userRef = doc(db, 'users', currentUser.uid);
-      // حفظ داخل الحقل settings.background
-      const snap = await getDoc(userRef);
-      let base = {};
-      if(snap.exists()) base = snap.data();
-      const settings = base.settings || {};
-      settings.background = bgObj;
-      await setDoc(userRef, { settings }, { merge:true });
-    }catch(e){ console.warn('تعذر حفظ الخلفية في Firestore', e); }
-  }
-}
+        const del = document.createElement('button');
+        del.textContent = 'حذف';
+        del.onclick = () => {
+          tracks.splice(idx, 1);
+          savePlaylistLocal();
+          renderPlaylist();
+          if (currentIndex >= tracks.length) currentIndex = Math.max(0, tracks.length - 1);
+          if (tracks.length > 0) loadTrack(currentIndex);
+          else { audio.pause(); audio.src = ''; trackNameEl.textContent = 'لا يوجد ملف مشغل'; }
+        };
 
-// عند التحميل، حاول تطبيق الخلفية من localStorage (إذا لم يتم استرجاعها من Firestore أثناء تسجيل الدخول)
-window.addEventListener('load', ()=>{ applyBackgroundFromLocal(); applyUISettingsFromLocal(); });
+        const edit = document.createElement('button');
+        edit.textContent = 'تعديل اسم';
+        edit.onclick = () => {
+          const newName = prompt('ادخل الاسم الجديد', t.name || `ملف ${idx + 1}`);
+          if (newName !== null) { tracks[idx].name = newName; renderPlaylist(); savePlaylistLocal(); }
+        };
 
-// ----------------------------
-// حفظ حالة اللوحات عند الخروج في حال وجود مستخدم
-// ----------------------------
-window.addEventListener('beforeunload', async ()=>{
-  try{
-    if(currentUser){
-      const userRef = doc(db,'users',currentUser.uid);
-      const panels = {
-        listPanel: { left: listPanel.style.left || listPanel.offsetLeft + 'px', top: listPanel.style.top || listPanel.offsetTop + 'px', width: listPanel.style.width || listPanel.offsetWidth + 'px', height: listPanel.style.height || listPanel.offsetHeight + 'px' },
-        chatPanel: { left: chatPanel.style.left || chatPanel.offsetLeft + 'px', top: chatPanel.style.top || chatPanel.offsetTop + 'px', width: chatPanel.style.width || chatPanel.offsetWidth + 'px', height: chatPanel.style.height || chatPanel.offsetHeight + 'px' }
-      };
-      await setDoc(userRef, { panels }, { merge:true });
+        actions.appendChild(edit);
+        actions.appendChild(del);
 
-      // احفظ إعدادات الواجهة أيضاً
-      try{
-        const uiRaw = JSON.parse(localStorage.getItem('uiSettings')||'{}');
-        const settingsSnap = await getDoc(userRef);
+        li.appendChild(left);
+        li.appendChild(actions);
+
+        playlistEl.appendChild(li);
+      });
+
+      highlightPlaying();
+    }
+
+    function loadTrack(index) {
+      if (!tracks || tracks.length === 0) return;
+      currentIndex = index;
+      let url = tracks[index].url;
+      if (isGoogleDriveViewLink(url)) url = driveViewToDirect(url);
+      audio.src = url;
+      trackNameEl.textContent = tracks[index].name || `ملف ${index + 1}`;
+      audio.play().catch(() => { /* تجاهل خطأ التشغيل التلقائي */ });
+      highlightPlaying();
+    }
+
+    function nextTrack() {
+      if (tracks.length === 0) return;
+      currentIndex = (currentIndex + 1) % tracks.length;
+      loadTrack(currentIndex);
+    }
+
+    function prevTrack() {
+      if (tracks.length === 0) return;
+      currentIndex = (currentIndex - 1 + tracks.length) % tracks.length;
+      loadTrack(currentIndex);
+    }
+
+    addTrackBtn.addEventListener('click', async () => {
+      const url = (newTrackUrl.value || '').trim();
+      let name = (newTrackName.value || '').trim();
+      if (!url) { alert('يرجى إدخال رابط الصوت أولاً'); return; }
+      let finalUrl = url;
+      if (isGoogleDriveViewLink(url)) finalUrl = driveViewToDirect(url);
+      if (!name) name = finalUrl.split('/').pop().substring(0, 40) || `ملف ${tracks.length + 1}`;
+      tracks.push({ name, url });
+      newTrackUrl.value = '';
+      newTrackName.value = '';
+      renderPlaylist();
+      savePlaylistLocal();
+      if (tracks.length === 1) loadTrack(0);
+    });
+
+    prevBtn.addEventListener('click', prevTrack);
+    nextBtn.addEventListener('click', nextTrack);
+
+    audio.addEventListener('ended', () => { nextTrack(); });
+
+    function highlightPlaying() {
+      const items = playlistEl.querySelectorAll('li');
+      items.forEach((li, i) => { li.style.background = i === currentIndex ? 'rgba(41,128,185,0.06)' : 'transparent'; });
+    }
+
+    // ----------------------------
+    // Save/load playlist to Firestore and localStorage
+    // ----------------------------
+    async function savePlaylistToFirestore() {
+      if (!currentUser) { alert('سجّل الدخول لحفظ القائمة في حسابك'); return; }
+      try {
+        const userRef = doc(db, 'users', currentUser.uid);
+        const snap = await getDoc(userRef);
         let base = {};
-        if(settingsSnap.exists()) base = settingsSnap.data();
+        if (snap.exists()) base = snap.data();
         const settings = base.settings || {};
-        settings.ui = Object.assign(settings.ui||{}, uiRaw);
-        await setDoc(userRef, { settings }, { merge:true });
-      }catch(e){ console.warn('تعذر حفظ إعدادات الواجهة قبل الخروج', e); }
-
-    } else {
-      savePanelState('listPanel', listPanel); savePanelState('chatPanel', chatPanel);
+        settings.playlist = tracks.slice();
+        await setDoc(userRef, { settings }, { merge: true });
+        savePlaylistLocal();
+        alert('تم حفظ قائمة التشغيل في حسابك');
+      } catch (e) {
+        console.warn('تعذر حفظ القائمة في Firestore', e);
+        alert('حدث خطأ عند حفظ القائمة');
+      }
     }
-  }catch(e){ console.warn('تعذر حفظ حالة اللوحات عند الخروج', e); }
-});
 
-</script>
+    function savePlaylistLocal() {
+      try {
+        localStorage.setItem('playlist', JSON.stringify(tracks));
+      } catch (e) {
+        console.warn('تعذر حفظ القائمة محلياً', e);
+      }
+    }
+
+    function loadPlaylistFromLocal() {
+      try {
+        const raw = localStorage.getItem('playlist');
+        if (raw) {
+          tracks = JSON.parse(raw);
+          renderPlaylist();
+          if (tracks.length > 0) loadTrack(0);
+        }
+      } catch (e) {
+        console.warn('تعذر قراءة القائمة المحلية', e);
+      }
+    }
+
+    savePlaylistBtn.addEventListener('click', savePlaylistToFirestore);
+
+    clearPlaylistBtn.addEventListener('click', () => {
+      if (!confirm('هل تريد تفريغ قائمة التشغيل؟')) return;
+      tracks = [];
+      renderPlaylist();
+      savePlaylistLocal();
+      if (currentUser) { savePlaylistToFirestore().catch(() => {}); }
+      audio.pause();
+      audio.src = '';
+      trackNameEl.textContent = 'لا يوجد ملف مشغل';
+    });
+
+    // ----------------------------
+    // حفظ حالة اللوحات والإعدادات قبل الخروج
+    // ----------------------------
+    window.addEventListener('beforeunload', async () => {
+      try {
+        savePlaylistLocal();
+        if (currentUser) {
+          const userRef = doc(db, 'users', currentUser.uid);
+          const panels = {
+            listPanel: { left: listPanel.style.left || listPanel.offsetLeft + 'px', top: listPanel.style.top || listPanel.offsetTop + 'px', width: listPanel.style.width || listPanel.offsetWidth + 'px', height: listPanel.style.height || listPanel.offsetHeight + 'px' },
+            chatPanel: { left: chatPanel.style.left || chatPanel.offsetLeft + 'px', top: chatPanel.style.top || chatPanel.offsetTop + 'px', width: chatPanel.style.width || chatPanel.offsetWidth + 'px', height: chatPanel.style.height || chatPanel.offsetHeight + 'px' }
+          };
+          await setDoc(userRef, { panels }, { merge: true });
+
+          try {
+            const uiRaw = JSON.parse(localStorage.getItem('uiSettings') || '{}');
+            const settingsSnap = await getDoc(userRef);
+            let base = {};
+            if (settingsSnap.exists()) base = settingsSnap.data();
+            const settings = base.settings || {};
+            settings.ui = Object.assign(settings.ui || {}, uiRaw);
+            settings.playlist = tracks.slice();
+            await setDoc(userRef, { settings }, { merge: true });
+          } catch (e) {
+            console.warn('تعذر حفظ إعدادات الواجهة قبل الخروج', e);
+          }
+        }
+      } catch (e) {
+        console.warn('تعذر حفظ حالة اللوحات عند الخروج', e);
+      }
+    });
+
+    // عند التحميل
+    window.addEventListener('load', () => {
+      applyBackgroundFromLocal();
+      applyUISettingsFromLocal();
+      loadPlaylistFromLocal();
+    });
+
+  </script>
+
 </body>
 </html>
