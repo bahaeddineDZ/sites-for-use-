@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>📚 مكتبتي للمواقع - Baha - (خلفية: لون/صورة في Firestore)</title>
+<title>📚 مكتبتي للمواقع - Baha - (خلفية: لون/صورة في Firestore + تحكم بالخط والشفافية)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 /* ==================================================
@@ -15,14 +15,19 @@
   --success:#27ae60;
   --muted:#7f8c8d;
   --card:#ffffff;
+  /* تحكم في حجم الخط والشفافية */
+  --base-font-size:14px; /* يمكن تغييره ديناميكياً */
+  --card-opacity:1;      /* شفافية البطاقات */
+  --panel-opacity:1;     /* شفافية اللوحات (القوائم، دردشة) */
+  --img-opacity:1;       /* ما إذا كانت الصور تتبع نفس الشفافية */
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;}
-body{font-family:Tahoma, Arial, sans-serif;background:linear-gradient(180deg,#eef6fb,#f4f6f9);color:var(--primary);display:flex;flex-direction:column}
+body{font-family:Tahoma, Arial, sans-serif;background:linear-gradient(180deg,#eef6fb,#f4f6f9);color:var(--primary);display:flex;flex-direction:column;font-size:var(--base-font-size)}
 
 /* Header */
 header{background:var(--primary);color:white;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-header h1{font-size:18px;margin:0}
+header h1{font-size:1.15rem;margin:0}
 .user-area{display:flex;align-items:center;gap:10px}
 .user-pic{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.16)}
 .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
@@ -31,18 +36,25 @@ header h1{font-size:18px;margin:0}
 /* Layout */
 .layout{display:flex;gap:18px;padding:18px;flex:1;align-items:flex-start;position:relative}
 .board{flex:1;min-width:320px;position:relative}
-.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-.controls input{padding:10px;border-radius:10px;border:1px solid #d0d7de;font-size:14px;flex:1;min-width:140px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.controls input[type="text"], .controls input[type="url"]{padding:10px;border-radius:10px;border:1px solid #d0d7de;font-size:14px;flex:1;min-width:140px}
 .controls .add-btn{background:var(--accent);padding:10px 16px;border-radius:10px;color:#fff;border:none;cursor:pointer}
 .controls .bg-btn{background:var(--success);color:#fff;padding:10px 16px;border-radius:10px;border:none;cursor:pointer}
 
+/* view control group (حجم الخط و الشفافية) */
+.view-controls{display:flex;gap:8px;align-items:center}
+.view-controls .control-group{display:flex;flex-direction:column;gap:6px;background:rgba(255,255,255,0.06);padding:8px;border-radius:10px;border:1px solid rgba(0,0,0,0.03)}
+.view-controls label{font-size:0.85rem;color:var(--muted)}
+.view-controls input[type='range']{width:160px}
+.view-controls .smallVal{font-size:0.85rem;color:var(--muted);text-align:center}
+
 /* Site cards area */
 #siteList{position:relative;min-height:420px;border-radius:12px;padding:12px;background:transparent}
-.card{position:absolute;width:200px;height:250px;border-radius:12px;box-shadow:0 8px 18px rgba(0,0,0,0.12);overflow:hidden;background:var(--card);transition:transform .15s;border:1px solid rgba(0,0,0,0.04)}
+.card{position:absolute;width:200px;height:250px;border-radius:12px;box-shadow:0 8px 18px rgba(0,0,0,0.12);overflow:hidden;transition:transform .15s;border:1px solid rgba(0,0,0,0.04);background:rgba(255,255,255,var(--card-opacity));opacity:1}
 .card:hover{transform:translateY(-6px)}
-.card img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer}
+.card img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer;opacity:var(--img-opacity)}
 .card-content{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.35));color:#fff;padding:8px;text-align:center}
-.card-content h3{margin:0;font-size:14px}
+.card-content h3{margin:0;font-size:0.95rem}
 .card .drag-handle{position:absolute;top:6px;right:6px;width:22px;height:22px;background:var(--accent);border-radius:6px;cursor:move;z-index:20;display:flex;align-items:center;justify-content:center;color:#fff}
 .card .resize-handle{position:absolute;left:6px;bottom:6px;width:18px;height:18px;background:var(--success);clip-path:polygon(0 100%,100% 100%,0 0);cursor:nwse-resize;z-index:20}
 .card .actions button{margin:2px;padding:6px 8px;border-radius:8px;border:none;cursor:pointer}
@@ -50,14 +62,14 @@ header h1{font-size:18px;margin:0}
 .card .actions .edit{background:#f39c12;color:#fff}
 
 /* Side panels (list & chat) */
-.list-panel{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);min-height:180px;position:absolute;left:20px;top:20px;width:320px;height:240px;z-index:40;border:1px solid rgba(0,0,0,0.06)}
+.list-panel{background:rgba(255,255,255,var(--panel-opacity));padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);min-height:180px;position:absolute;left:20px;top:20px;width:320px;height:240px;z-index:40;border:1px solid rgba(0,0,0,0.06)}
 .list-panel h3{margin:0 0 8px 0;font-size:16px;color:var(--primary)}
 .sites-list-short{display:flex;flex-direction:column;gap:8px;max-height:calc(100% - 56px);overflow:auto}
 .site-item{display:flex;gap:8px;align-items:center}
 .site-item img{width:48px;height:36px;object-fit:cover;border-radius:6px}
 .site-item a{color:var(--accent);text-decoration:none;display:block}
 
-.chat-panel{display:flex;flex-direction:column;gap:8px;background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);position:absolute;right:20px;top:260px;width:380px;height:420px;z-index:38;border:1px solid rgba(0,0,0,0.06)}
+.chat-panel{display:flex;flex-direction:column;gap:8px;background:rgba(255,255,255,var(--panel-opacity));padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);position:absolute;right:20px;top:260px;width:380px;height:420px;z-index:38;border:1px solid rgba(0,0,0,0.06)}
 .chat-panel h3{margin:0 0 4px 0;font-size:16px;color:var(--primary)}
 #chatBox{overflow:auto;border-radius:8px;padding:8px;background:#fbfdff;border:1px solid #eef5fb;height:calc(100% - 140px)}
 .msg{display:inline-block;padding:8px 12px;margin:5px 0;border-radius:15px;max-width:70%;clear:both;word-wrap:break-word}
@@ -101,6 +113,31 @@ header h1{font-size:18px;margin:0}
       <input id="siteImage" placeholder="رابط صورة (اختياري)">
       <button id="addBtn" class="add-btn">➕ إضافة</button>
       <button id="changeBgBtn" class="bg-btn">🎨 تغيير الخلفية (لون/صورة)</button>
+
+      <!-- view controls: حجم الخط و الشفافية -->
+      <div class="view-controls">
+        <div class="control-group" style="min-width:220px;">
+          <label for="fontSizeRange">حجم الخط</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input id="fontSizeRange" type="range" min="12" max="20" step="1" value="14">
+            <div id="fontSizeValue" class="smallVal">14px</div>
+          </div>
+        </div>
+
+        <div class="control-group" style="min-width:220px;">
+          <label for="opacityRange">شفافية البطاقات والقوائم</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input id="opacityRange" type="range" min="0.2" max="1" step="0.05" value="1">
+            <div id="opacityValue" class="smallVal">100%</div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;color:var(--muted)"><input id="applyToImages" type="checkbox"> تطبيق الشفافية على الصور</label>
+        </div>
+
+        <div style="display:flex;flex-direction:column;justify-content:center;gap:6px;">
+          <button id="resetView" class="btn secondary">إعادة الإعدادات</button>
+        </div>
+      </div>
+
     </div>
     <div id="siteList" aria-live="polite"></div>
   </div>
@@ -136,6 +173,7 @@ header h1{font-size:18px;margin:0}
 /*
   نسخة مفصّلة: حفظ الخلفية كلون أو صورة في Firestore تحت users/<uid>/settings.background
   بالإضافة إلى النسخ المحلية في localStorage كنسخة احتياطية.
+  تمت إضافة: تحكم بحجم الخط وشفافية البطاقات/القوائم (تخزّن في users/<uid>/settings.ui)
 */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -182,6 +220,14 @@ const changeBgBtn = document.getElementById("changeBgBtn");
 const listPanel = document.getElementById('listPanel');
 const chatPanel = document.getElementById('chatPanel');
 
+// عناصر التحكم الجديدة
+const fontSizeRange = document.getElementById('fontSizeRange');
+const fontSizeValue = document.getElementById('fontSizeValue');
+const opacityRange = document.getElementById('opacityRange');
+const opacityValue = document.getElementById('opacityValue');
+const applyToImages = document.getElementById('applyToImages');
+const resetViewBtn = document.getElementById('resetView');
+
 let currentUser=null;
 let editId=null;
 
@@ -203,30 +249,41 @@ onAuthStateChanged(auth, async (user) => {
   userNameEl.style.display = user ? "inline-block" : "none";
   chatHint.textContent = user ? "مسجّل الدخول — يمكنك إرسال الرسائل وإضافة المواقع." : "سجّل الدخول لتستطيع الكتابة.";
 
-  // عند تسجيل الدخول: استرجع إعدادات المستخدم (خاصة الخلفية & مواضع اللوحات)
+  // عند تسجيل الدخول: استرجع إعدادات المستخدم (خاصة الخلفية & مواضع اللوحات و إعدادات الواجهة)
   if(user){
     try{
       const userRef = doc(db, "users", user.uid);
       const snap = await getDoc(userRef);
       if(snap.exists()){
         const data = snap.data();
-        // إذا حفظت الخلفية في settings.background — طبقها
+        // Background
         if(data.settings && data.settings.background){
           applyBackgroundFromObject(data.settings.background);
         } else {
-          // خلافاً لذلك: حاول استخدام localStorage كنسخة احتياطية
           applyBackgroundFromLocal();
         }
-        // إذا فيه panels محفوظة — طبقها
+        // Panels
         if(data.panels) applyPanelsFromObject(data.panels);
+        // UI settings (حجم الخط و الشفافية)
+        if(data.settings && data.settings.ui){
+          const ui = data.settings.ui;
+          if(ui.fontSize) applyFontSize(ui.fontSize);
+          if(typeof ui.opacity !== 'undefined') applyOpacity(ui.opacity, ui.applyToImages);
+          // تأكد من مزامنة عناصر التحكم
+          syncUIControls(ui);
+        } else {
+          applyUISettingsFromLocal();
+        }
       } else {
         // لا مستند في Firestore، fallback إلى localStorage
         applyBackgroundFromLocal();
+        applyUISettingsFromLocal();
       }
-    }catch(e){ console.warn('خطأ استرجاع إعدادات المستخدم:', e); applyBackgroundFromLocal(); }
+    }catch(e){ console.warn('خطأ استرجاع إعدادات المستخدم:', e); applyBackgroundFromLocal(); applyUISettingsFromLocal(); }
   } else {
     // لا مستخدم — طبق localStorage أو الافتراضي
     applyBackgroundFromLocal();
+    applyUISettingsFromLocal();
   }
 });
 
@@ -482,28 +539,112 @@ function applyBackgroundFromLocal(){
   }catch(e){ console.warn('applyBackgroundFromLocal error', e); document.body.style.background = "linear-gradient(180deg,#eef6fb,#f4f6f9)"; }
 }
 
-// Helper to save background setting (both Firestore and localStorage)
-async function saveBackgroundSetting(bgObj){
+// ----------------------------
+// UI settings: font size & opacity
+// stores in localStorage under 'uiSettings' and in Firestore under users/<uid>.settings.ui
+// ui = { fontSize: 14, opacity: 1, applyToImages: false }
+// ----------------------------
+function applyFontSize(size){
   try{
-    // save locally always
-    localStorage.setItem('backgroundSetting', JSON.stringify(bgObj));
-  }catch(e){ console.warn('تعذر حفظ الخلفية محليا', e); }
+    document.documentElement.style.setProperty('--base-font-size', (typeof size === 'number' ? size : parseInt(size)) + 'px');
+    fontSizeValue.textContent = (typeof size === 'number' ? size : parseInt(size)) + 'px';
+  }catch(e){ console.warn('applyFontSize error', e); }
+}
+
+function applyOpacity(val, applyImgs=false){
+  try{
+    const opacity = parseFloat(val);
+    document.documentElement.style.setProperty('--card-opacity', opacity);
+    document.documentElement.style.setProperty('--panel-opacity', opacity);
+    if(applyImgs){
+      document.documentElement.style.setProperty('--img-opacity', opacity);
+    } else {
+      document.documentElement.style.setProperty('--img-opacity', 1);
+    }
+    opacityValue.textContent = Math.round(opacity * 100) + '%';
+    applyToImages.checked = !!applyImgs;
+  }catch(e){ console.warn('applyOpacity error', e); }
+}
+
+async function saveUISettings(obj){
+  try{
+    // save locally
+    const cur = JSON.parse(localStorage.getItem('uiSettings')||'{}');
+    const merged = Object.assign(cur, obj);
+    localStorage.setItem('uiSettings', JSON.stringify(merged));
+  }catch(e){ console.warn('تعذر حفظ إعدادات الواجهة محلياً', e); }
 
   if(currentUser){
     try{
       const userRef = doc(db, 'users', currentUser.uid);
-      // حفظ داخل الحقل settings.background
       const snap = await getDoc(userRef);
       let base = {};
       if(snap.exists()) base = snap.data();
       const settings = base.settings || {};
-      settings.background = bgObj;
+      settings.ui = Object.assign(settings.ui || {}, obj);
       await setDoc(userRef, { settings }, { merge:true });
-    }catch(e){ console.warn('تعذر حفظ الخلفية في Firestore', e); }
+    }catch(e){ console.warn('تعذر حفظ إعدادات الواجهة في Firestore', e); }
   }
 }
 
+function applyUISettingsFromLocal(){
+  try{
+    const raw = localStorage.getItem('uiSettings');
+    if(raw){
+      const ui = JSON.parse(raw);
+      if(ui.fontSize) applyFontSize(ui.fontSize);
+      if(typeof ui.opacity !== 'undefined') applyOpacity(ui.opacity, ui.applyToImages);
+      syncUIControls(ui);
+    } else {
+      // قيم افتراضية
+      applyFontSize(14);
+      applyOpacity(1, false);
+      syncUIControls({ fontSize:14, opacity:1, applyToImages:false });
+    }
+  }catch(e){ console.warn('applyUISettingsFromLocal error', e); applyFontSize(14); applyOpacity(1,false); }
+}
+
+function syncUIControls(ui){
+  try{
+    if(typeof ui.fontSize !== 'undefined') fontSizeRange.value = ui.fontSize;
+    if(typeof ui.opacity !== 'undefined') opacityRange.value = ui.opacity;
+    applyToImages.checked = !!ui.applyToImages;
+    fontSizeValue.textContent = (ui.fontSize||14) + 'px';
+    opacityValue.textContent = Math.round((typeof ui.opacity !== 'undefined' ? ui.opacity : 1) * 100) + '%';
+  }catch(e){ console.warn('syncUIControls error', e); }
+}
+
+// Event listeners for view controls
+fontSizeRange.addEventListener('input', e=>{
+  const val = parseInt(e.target.value);
+  applyFontSize(val);
+  saveUISettings({ fontSize: val });
+});
+
+opacityRange.addEventListener('input', e=>{
+  const val = parseFloat(e.target.value);
+  const applyImgs = applyToImages.checked;
+  applyOpacity(val, applyImgs);
+  saveUISettings({ opacity: val, applyToImages: applyImgs });
+});
+
+applyToImages.addEventListener('change', ()=>{
+  const val = parseFloat(opacityRange.value);
+  applyOpacity(val, applyToImages.checked);
+  saveUISettings({ opacity: val, applyToImages: applyToImages.checked });
+});
+
+resetViewBtn.addEventListener('click', ()=>{
+  // إعادة للقيم الافتراضية
+  applyFontSize(14);
+  applyOpacity(1,false);
+  saveUISettings({ fontSize:14, opacity:1, applyToImages:false });
+  alert('تمت إعادة إعدادات العرض إلى الافتراضي.');
+});
+
+// ----------------------------
 // UI flow: عند الضغط على زر تغيير الخلفية
+// ----------------------------
 changeBgBtn.addEventListener('click', async ()=>{
   // عرض خيار بسيط: لون أم صورة؟
   const choice = prompt('اكتب "color" لاختيار لون (مثال: #ffffff) أو "image" لوضع رابط صورة للخلفية:').trim().toLowerCase();
@@ -527,8 +668,29 @@ changeBgBtn.addEventListener('click', async ()=>{
   }
 });
 
+// Helper to save background setting (both Firestore and localStorage)
+async function saveBackgroundSetting(bgObj){
+  try{
+    // save locally always
+    localStorage.setItem('backgroundSetting', JSON.stringify(bgObj));
+  }catch(e){ console.warn('تعذر حفظ الخلفية محليا', e); }
+
+  if(currentUser){
+    try{
+      const userRef = doc(db, 'users', currentUser.uid);
+      // حفظ داخل الحقل settings.background
+      const snap = await getDoc(userRef);
+      let base = {};
+      if(snap.exists()) base = snap.data();
+      const settings = base.settings || {};
+      settings.background = bgObj;
+      await setDoc(userRef, { settings }, { merge:true });
+    }catch(e){ console.warn('تعذر حفظ الخلفية في Firestore', e); }
+  }
+}
+
 // عند التحميل، حاول تطبيق الخلفية من localStorage (إذا لم يتم استرجاعها من Firestore أثناء تسجيل الدخول)
-window.addEventListener('load', ()=>{ applyBackgroundFromLocal(); });
+window.addEventListener('load', ()=>{ applyBackgroundFromLocal(); applyUISettingsFromLocal(); });
 
 // ----------------------------
 // حفظ حالة اللوحات عند الخروج في حال وجود مستخدم
@@ -542,6 +704,18 @@ window.addEventListener('beforeunload', async ()=>{
         chatPanel: { left: chatPanel.style.left || chatPanel.offsetLeft + 'px', top: chatPanel.style.top || chatPanel.offsetTop + 'px', width: chatPanel.style.width || chatPanel.offsetWidth + 'px', height: chatPanel.style.height || chatPanel.offsetHeight + 'px' }
       };
       await setDoc(userRef, { panels }, { merge:true });
+
+      // احفظ إعدادات الواجهة أيضاً
+      try{
+        const uiRaw = JSON.parse(localStorage.getItem('uiSettings')||'{}');
+        const settingsSnap = await getDoc(userRef);
+        let base = {};
+        if(settingsSnap.exists()) base = settingsSnap.data();
+        const settings = base.settings || {};
+        settings.ui = Object.assign(settings.ui||{}, uiRaw);
+        await setDoc(userRef, { settings }, { merge:true });
+      }catch(e){ console.warn('تعذر حفظ إعدادات الواجهة قبل الخروج', e); }
+
     } else {
       savePanelState('listPanel', listPanel); savePanelState('chatPanel', chatPanel);
     }
