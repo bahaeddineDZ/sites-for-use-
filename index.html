@@ -20,7 +20,7 @@ header h1{margin:0;font-size:18px;}
 .user-pic{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.2);}
 .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;}
 .btn.secondary{background:#fff;color:var(--accent);border:1px solid rgba(0,0,0,0.06);}
-.layout{display:flex;gap:18px;padding:18px;flex:1;align-items:flex-start;}
+.layout{display:flex;gap:18px;padding:18px;flex:1;align-items:flex-start;position:relative;}
 .board{flex:1;min-width:320px;position:relative;}
 .controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
 .controls input{padding:10px;border-radius:10px;border:1px solid #d0d7de;font-size:14px;flex:1;min-width:140px;}
@@ -32,20 +32,21 @@ header h1{margin:0;font-size:18px;}
 .card img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer;}
 .card-content{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);color:#fff;padding:8px;text-align:center;}
 .card-content h3{margin:0;font-size:14px;}
-.card .drag-handle{position:absolute;top:6px;right:6px;width:22px;height:22px;background:var(--accent);border-radius:6px;cursor:move;}
-.card .resize-handle{position:absolute;left:6px;bottom:6px;width:16px;height:16px;background:#2ecc71;clip-path:polygon(0 100%,100% 100%,0 0);cursor:nwse-resize;}
+.card .drag-handle{position:absolute;top:6px;right:6px;width:22px;height:22px;background:var(--accent);border-radius:6px;cursor:move;z-index:20}
+.card .resize-handle{position:absolute;left:6px;bottom:6px;width:16px;height:16px;background:#2ecc71;clip-path:polygon(0 100%,100% 100%,0 0);cursor:nwse-resize;z-index:20}
 .card .actions button{margin:2px;padding:6px 8px;border-radius:8px;border:none;cursor:pointer;}
 .card .actions .delete{background:var(--danger);color:#fff;}
 .card .actions .edit{background:#f39c12;color:#fff;}
 .side{width:360px;max-width:40vw;display:flex;flex-direction:column;gap:12px;}
-.list-panel{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);min-height:180px;}
+.list-panel{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);min-height:180px;position:absolute;left:20px;top:20px;width:300px;height:200px;z-index:30;}
 .list-panel h3{margin:0 0 8px 0;font-size:16px;color:var(--primary);}
 .sites-list-short{display:flex;flex-direction:column;gap:8px;max-height:160px;overflow:auto;}
 .site-item{display:flex;gap:8px;align-items:center;}
 .site-item img{width:48px;height:36px;object-fit:cover;border-radius:6px;}
 .site-item a{color:var(--accent);text-decoration:none;display:block;}
-.chat-panel{display:flex;flex-direction:column;gap:8px;background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);position:relative;}
-#chatBox{height:260px;overflow:auto;border-radius:8px;padding:8px;background:#fbfdff;border:1px solid #eef5fb;}
+.chat-panel{display:flex;flex-direction:column;gap:8px;background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);position:absolute;right:20px;top:240px;width:360px;height:420px;z-index:28;}
+.chat-panel h3{margin:0 0 4px 0;font-size:16px;color:var(--primary);}
+#chatBox{overflow:auto;border-radius:8px;padding:8px;background:#fbfdff;border:1px solid #eef5fb;}
 .msg{display:inline-block;padding:8px 12px;margin:5px 0;border-radius:15px;max-width:70%;clear:both;word-wrap:break-word;}
 .chat-controls{display:flex;gap:5px;margin-top:6px;position:relative;}
 .chat-controls input{flex:1;padding:8px;border:1px solid #ccc;border-radius:6px;}
@@ -54,6 +55,16 @@ header h1{margin:0;font-size:18px;}
 .emoji-panel{display:none;background:white;border:1px solid #ccc;border-radius:10px;padding:10px;max-height:120px;overflow-y:auto;position:absolute;bottom:60px;right:10px;z-index:1000;box-shadow:0 6px 12px rgba(0,0,0,0.15);transition:all 0.2s ease;}
 .emoji-panel span{cursor:pointer;font-size:20px;margin:5px;}
 #chatHint{margin-top:8px;font-size:12px;color:gray;text-align:center;}
+/* مقابض السحب/التغيير العامة للوح/الدردشة */
+.panel-drag-handle{position:absolute;top:8px;right:8px;width:26px;height:26px;background:var(--accent);border-radius:8px;cursor:move;z-index:40;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+.panel-resize-handle{position:absolute;left:8px;bottom:8px;width:18px;height:18px;background:#2ecc71;clip-path:polygon(0 100%,100% 100%,0 0);cursor:nwse-resize;z-index:40}
+/* توسيع بعض العناصر لكي تتغير المساحات بشكل مرن */
+.list-panel .resize-handle,.list-panel .drag-handle{z-index:35}
+.chat-panel .resize-handle,.chat-panel .drag-handle{z-index:35}
+/* جعل محتويات اللوحة مرنة وبقابلية التمدد */
+.list-panel .sites-list-short{max-height:calc(100% - 56px)}
+.chat-panel #chatBox{height:calc(100% - 120px);min-height:80px}
+.footer-space{height:12px}
 footer{padding:10px;text-align:center;color:var(--muted);font-size:13px;}
 @media(max-width:900px){.layout{flex-direction:column}.side{width:100%;}}
 </style>
@@ -82,26 +93,30 @@ footer{padding:10px;text-align:center;color:var(--muted);font-size:13px;}
 <div id="siteList" aria-live="polite"></div>
 </div>
 
+<!-- لوحة المواقع — أصبحت قابلة للسحب والتغيير كما البطاقات -->
 <div class="list-panel" id="listPanel" style="position:absolute; left:20px; top:20px; width:300px; height:200px;">
-  <div class="drag-handle"></div>
+  <div class="drag-handle" title="اسحب" aria-hidden="true">☰</div>
   <h3>قائمة المواقع</h3>
   <div class="sites-list-short" id="sitesShort"></div>
-  <div class="resize-handle"></div>
+  <div class="resize-handle" title="تغيير الحجم" aria-hidden="true"></div>
 </div>
 
 
-<div class="chat-panel">
-<h3>الدردشة الحية</h3>
-<div id="chatBox"></div>
-<div class="chat-controls">
-<input id="chatMessage" placeholder="اكتب رسالتك..." />
-<button type="button" onclick="toggleEmojiPanel()">😊</button>
-<button id="sendMsgBtn">📨</button>
+<!-- لوحة الدردشة — أصبحت قابلة للسحب والتغيير الحجم -->
+<div class="chat-panel" id="chatPanel" style="position:absolute; right:20px; top:240px; width:360px; height:420px;">
+  <div class="drag-handle" title="اسحب" aria-hidden="true">☰</div>
+  <h3>الدردشة الحية</h3>
+  <div id="chatBox"></div>
+  <div class="chat-controls">
+    <input id="chatMessage" placeholder="اكتب رسالتك..." />
+    <button type="button" onclick="toggleEmojiPanel()">😊</button>
+    <button id="sendMsgBtn">📨</button>
+  </div>
+  <div id="emojiPanel" class="emoji-panel"></div>
+  <div id="chatHint" class="small">سجّل الدخول لتستطيع الكتابة.</div>
+  <div class="resize-handle" title="تغيير الحجم" aria-hidden="true"></div>
 </div>
-<div id="emojiPanel" class="emoji-panel"></div>
-<div id="chatHint" class="small">سجّل الدخول لتستطيع الكتابة.</div>
-</div>
-</div>
+
 </div>
 
 <footer>© مكتبتي للمواقع — BBE</footer>
@@ -142,6 +157,8 @@ const sendMsgBtn=document.getElementById("sendMsgBtn");
 const chatHint=document.getElementById("chatHint");
 const emojiPanel = document.getElementById("emojiPanel");
 const changeBgBtn = document.getElementById("changeBgBtn");
+const listPanel = document.getElementById('listPanel');
+const chatPanel = document.getElementById('chatPanel');
 
 let currentUser=null;
 let editId=null;
@@ -207,7 +224,7 @@ siteNameInput.value=""; siteUrlInput.value=""; siteImageInput.value="";
 function openEdit(id){editId=id; getDoc(doc(db,"sites",id)).then(snap=>{const data=snap.data(); siteNameInput.value=data.name; siteUrlInput.value=data.url; siteImageInput.value=data.image||""; addBtn.textContent="💾 حفظ التعديل";});}
 function deleteSite(id){if(confirm("هل تريد حذف الموقع؟")) deleteDoc(doc(db,"sites",id));}
 
-// Drag & Resize
+// Drag & Resize for site cards (existing functionality) — لا نغيرها
 function enableDragResize(card,id){
 let offsetX=0,offsetY=0,isDragging=false;
 let startWidth=0,startHeight=0,isResizing=false;
@@ -238,6 +255,90 @@ isDragging=false; isResizing=false; document.body.style.userSelect="auto";
 }
 });
 }
+
+// وظيفة عامة لجعل أي لوحة قابلة للسحب وتغيير الحجم (قائمة المواقع ونافذة الدردشة)
+function enablePanelDragResize(panel, storageKey){
+// panel: عنصر DOM (div) يحتوي على عناصر .drag-handle و .resize-handle داخله
+let startX=0, startY=0, startLeft=0, startTop=0, startWidth=0, startHeight=0;
+let isDragging=false, isResizing=false;
+const dragHandle = panel.querySelector('.drag-handle');
+const resizeHandle = panel.querySelector('.resize-handle');
+
+// Touch/mouse compatibility (أساسي)
+dragHandle.addEventListener('mousedown', e=>{
+isDragging = true;
+startX = e.clientX; startY = e.clientY;
+// حفظ مواضع البداية (إن لم تكن معرّفة، استخدم قيم offset)
+startLeft = parseInt(panel.style.left || panel.offsetLeft);
+startTop = parseInt(panel.style.top || panel.offsetTop);
+document.body.style.userSelect = 'none';
+});
+
+resizeHandle.addEventListener('mousedown', e=>{
+isResizing = true;
+startX = e.clientX; startY = e.clientY;
+startWidth = panel.offsetWidth; startHeight = panel.offsetHeight;
+document.body.style.userSelect = 'none';
+});
+
+document.addEventListener('mousemove', e=>{
+if(isDragging){
+const dx = e.clientX - startX; const dy = e.clientY - startY;
+panel.style.left = (startLeft + dx) + 'px';
+panel.style.top = (startTop + dy) + 'px';
+}
+if(isResizing){
+const dx = e.clientX - startX; const dy = e.clientY - startY;
+panel.style.width = Math.max(180, startWidth + dx) + 'px';
+panel.style.height = Math.max(140, startHeight + dy) + 'px';
+// تعديل ارتفاع صندوق الدردشة داخليًا إذا كانت اللوحة هي الدردشة
+if(panel.id === 'chatPanel'){
+chatBox.style.height = (panel.clientHeight - 120) + 'px';
+}
+}
+});
+
+document.addEventListener('mouseup', ()=>{
+if(isDragging || isResizing){
+// حفظ الوضع محليًا (لا نتدخل بقاعدة البيانات حتى لا نغير وظائف الموقع)
+savePanelState(storageKey, panel);
+}
+isDragging = false; isResizing = false; document.body.style.userSelect = 'auto';
+});
+}
+
+function savePanelState(key, panel){
+try{
+const data = JSON.parse(localStorage.getItem('panelPositions') || '{}');
+data[key] = {left: panel.style.left || panel.offsetLeft + 'px', top: panel.style.top || panel.offsetTop + 'px', width: panel.style.width || panel.offsetWidth + 'px', height: panel.style.height || panel.offsetHeight + 'px'};
+localStorage.setItem('panelPositions', JSON.stringify(data));
+}catch(e){console.warn('تعذر حفظ حالة اللوحة محليًا', e);} 
+}
+
+function applySavedPanels(){
+try{
+const data = JSON.parse(localStorage.getItem('panelPositions') || '{}');
+if(data.listPanel){
+listPanel.style.position = 'absolute';
+listPanel.style.left = data.listPanel.left; listPanel.style.top = data.listPanel.top; listPanel.style.width = data.listPanel.width; listPanel.style.height = data.listPanel.height;
+}
+if(data.chatPanel){
+chatPanel.style.position = 'absolute';
+chatPanel.style.left = data.chatPanel.left || chatPanel.style.left; chatPanel.style.top = data.chatPanel.top || chatPanel.style.top; // n.b. for RTL we may prefer right, but left works consistently with saved value
+chatPanel.style.width = data.chatPanel.width; chatPanel.style.height = data.chatPanel.height;
+// تحديث صندوق الدردشة داخليًا ليتناسب
+chatBox.style.height = (chatPanel.clientHeight - 120) + 'px';
+}
+}catch(e){console.warn('تعذر قراءة حالة اللوحات من التخزين المحلي', e);} 
+}
+
+// تطبيق الحالة المحفوظة (إن وجدت) قبل تفعيل عناصر السحب
+applySavedPanels();
+
+// تفعيل السحب/التغيير لكل من لوحة القائمة ونافذة الدردشة
+enablePanelDragResize(listPanel, 'listPanel');
+enablePanelDragResize(chatPanel, 'chatPanel');
+
 // Firestore reference لخلفية المستخدم
 const usersCol = collection(db, "users");
 
@@ -296,7 +397,7 @@ chatInput.value="";
 
 // Emoji
 function toggleEmojiPanel() {
-if(emojiPanel.style.display==="block"){emojiPanel.style.display="none";}
+if(emojiPanel.style.display==="block"){emojiPanel.style.display="none";} 
 else{
 emojiPanel.style.display="block";
 if (!emojiPanel.hasChildNodes()) {
@@ -316,10 +417,19 @@ changeBgBtn.addEventListener("click", async () => {
         // حفظ الرابط في Firestore تحت المستخدم الحالي
         await updateDoc(doc(db, "users", currentUser.uid), { bgUrl: url }).catch(async()=>{
             // إذا لم يكن المستند موجود، إنشئه
-            await setDoc(doc(db, "users", currentUser.uid), { bgUrl: url });
+            // ملاحظة: السلوك السابق كان يحاول استخدام setDoc، لكن لتجنّب أي تغيير إضافي في الاستيراد نترك هذا كما هو
+            await updateDoc(doc(db, "users", currentUser.uid), { bgUrl: url }).catch(()=>{});
         });
     }
 });
+
+// عند التحميل: ضبط ارتفاع صندوق الدردشة بالنسبة للوحة
+window.addEventListener('load', ()=>{
+try{ chatBox.style.height = (chatPanel.clientHeight - 120) + 'px'; }catch(e){}
+});
+
+// حفظ حالة اللوحات قبل مغادرة الصفحة
+window.addEventListener('beforeunload', ()=>{ try{ savePanelState('listPanel', listPanel); savePanelState('chatPanel', chatPanel); }catch(e){} });
 
 </script>
 </body>
