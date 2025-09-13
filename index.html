@@ -495,16 +495,33 @@ enablePanelDragResize(chatPanel,'chatPanel');
 // ----------------------------
 // Emoji panel toggle
 // ----------------------------
-function toggleEmojiPanel(){
-  if(emojiPanel.style.display==='block'){ emojiPanel.style.display='none'; }
-  else{
-    emojiPanel.style.display='block';
-    if(!emojiPanel.hasChildNodes()){
-      const emojis = "😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤐 🤨 😐 😑 😶 😏".split(" ");
-      emojis.forEach(e=>{ const span=document.createElement('span'); span.textContent=e; span.onclick=()=>{ chatInput.value += e; emojiPanel.style.display='none'; }; emojiPanel.appendChild(span); });
+function toggleEmojiPanel() {
+    const emojiPanel = document.getElementById('emojiPanel'); // تأكد من تعريف العنصر
+    const chatInput = document.getElementById('chatInput');   // تأكد من تعريف حقل الإدخال
+
+    if (emojiPanel.style.display === 'block') {
+        emojiPanel.style.display = 'none';
+    } else {
+        emojiPanel.style.display = 'block';
+        
+        if (!emojiPanel.hasChildNodes()) {
+            const emojis = "😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 🙃 😉 😌 😍 🥰 😘 😗 😙 😚 😋 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤐 🤨 😐 😑 😶 😏".split(" ");
+            
+            emojis.forEach(e => {
+                const span = document.createElement('span');
+                span.textContent = e;
+                span.style.cursor = 'pointer';      // يظهر مؤشر عند المرور على الرموز
+                span.style.margin = '5px';          // مسافة بسيطة بين الرموز
+                span.onclick = () => {
+                    chatInput.value += e;
+                    emojiPanel.style.display = 'none';
+                };
+                emojiPanel.appendChild(span);
+            });
+        }
     }
-  }
 }
+
 
 // ----------------------------
 // Background: apply & save (color or image)
