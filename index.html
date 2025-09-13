@@ -2,107 +2,139 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>📚 مكتبتي - مشغل صوتي قابل للسحب</title>
+<title>📚 مكتبتي - نسخة كاملة مع مشغل الصوت وتحريك الأيقونة</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-:root{
-  --primary:#2c3e50;
-  --accent:#2980b9;
-  --danger:#e74c3c;
-  --muted:#7f8c8d;
+:root {
+  --primary: #2c3e50;
+  --accent: #2980b9;
+  --danger: #e74c3c;
+  --muted: #7f8c8d;
 }
-body{font-family:Arial, sans-serif; margin:0; padding:0; background:#ecf0f1;}
-#draggableIcon{
-  width:50px; height:50px; background:var(--accent); border-radius:50%; 
-  position:fixed; top:100px; left:100px; cursor:grab; display:flex;
-  justify-content:center; align-items:center; color:#fff; font-weight:bold; z-index:1000;
+body {
+  font-family: Arial, sans-serif;
+  background-color: var(--primary);
+  color: white;
+  margin: 0;
+  padding: 0;
 }
-#audioPlayer{ display:none; position:fixed; bottom:20px; right:20px; background:#fff; border:1px solid var(--accent); padding:10px; border-radius:10px; z-index:999;}
-#audioList{max-height:200px; overflow-y:auto; margin-top:10px;}
-.audioItem{padding:5px; border-bottom:1px solid #ccc; cursor:pointer;}
-.audioItem:hover{background:#f1f1f1;}
-button{margin:2px; padding:5px;}
+#audio-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--accent);
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+  z-index: 999;
+}
+#audio-player {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  width: 300px;
+  background: #34495e;
+  padding: 10px;
+  border-radius: 10px;
+  display: none;
+}
+#audio-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+.audio-item {
+  padding: 5px;
+  cursor: pointer;
+  border-bottom: 1px solid #555;
+}
+.audio-item:hover {
+  background: #2980b9;
+}
 </style>
 </head>
 <body>
 
-<div id="draggableIcon">🎵</div>
-<div id="audioPlayer">
-  <div>المشغل الصوتي</div>
-  <audio id="player" controls></audio>
-  <div id="audioList"></div>
+<div id="audio-icon">🔊</div>
+<div id="audio-player">
+  <audio id="player" controls style="width: 100%;"></audio>
+  <div id="audio-list"></div>
 </div>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-  // تكوين Firebase
+  // ====== Firebase Config ======
   const firebaseConfig = {
-    apiKey: "API_KEY",
-    authDomain: "PROJECT_ID.firebaseapp.com",
-    projectId: "PROJECT_ID",
-    storageBucket: "PROJECT_ID.appspot.com",
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
     messagingSenderId: "SENDER_ID",
     appId: "APP_ID"
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  const icon = document.getElementById('draggableIcon');
-  const playerDiv = document.getElementById('audioPlayer');
+  const audioIcon = document.getElementById('audio-icon');
+  const audioPlayerDiv = document.getElementById('audio-player');
   const player = document.getElementById('player');
-  const audioListDiv = document.getElementById('audioList');
+  const audioListDiv = document.getElementById('audio-list');
 
-  let isDragging = false, offsetX, offsetY;
-
-  // تحميل موقع الأيقونة من Firestore
-  db.collection('settings').doc('draggableIcon').get().then(doc => {
+  // ===== Load Icon Position =====
+  db.collection('ui').doc('audioIcon').get().then(doc => {
     if(doc.exists){
-      const data = doc.data();
-      icon.style.top = data.top + 'px';
-      icon.style.left = data.left + 'px';
+      const pos = doc.data();
+      audioIcon.style.right = pos.right + 'px';
+      audioIcon.style.bottom = pos.bottom + 'px';
     }
   });
 
-  icon.addEventListener('mousedown', (e)=>{
+  // ===== Drag & Drop for Icon =====
+  let isDragging = false;
+  let offsetX, offsetY;
+
+  audioIcon.addEventListener('mousedown', (e)=>{
     isDragging = true;
-    offsetX = e.clientX - icon.offsetLeft;
-    offsetY = e.clientY - icon.offsetTop;
-    icon.style.cursor = 'grabbing';
+    offsetX = e.clientX - audioIcon.getBoundingClientRect().right;
+    offsetY = e.clientY - audioIcon.getBoundingClientRect().bottom;
+    audioIcon.style.cursor = 'grabbing';
   });
-
-  document.addEventListener('mousemove', (e)=>{
-    if(isDragging){
-      icon.style.left = (e.clientX - offsetX) + 'px';
-      icon.style.top = (e.clientY - offsetY) + 'px';
-    }
-  });
-
   document.addEventListener('mouseup', ()=>{
     if(isDragging){
       isDragging = false;
-      icon.style.cursor = 'grab';
-      // حفظ الاحداثيات في Firestore
-      db.collection('settings').doc('draggableIcon').set({
-        top: parseInt(icon.style.top),
-        left: parseInt(icon.style.left)
+      audioIcon.style.cursor = 'grab';
+      // Save position to Firestore
+      db.collection('ui').doc('audioIcon').set({
+        right: parseInt(audioIcon.style.right),
+        bottom: parseInt(audioIcon.style.bottom)
       });
     }
   });
-
-  // فتح/إغلاق المشغل عند الضغط على الأيقونة
-  icon.addEventListener('click', ()=>{
-    playerDiv.style.display = playerDiv.style.display === 'none' ? 'block' : 'none';
+  document.addEventListener('mousemove', (e)=>{
+    if(isDragging){
+      let right = window.innerWidth - e.clientX - offsetX - audioIcon.offsetWidth;
+      let bottom = window.innerHeight - e.clientY - offsetY - audioIcon.offsetHeight;
+      audioIcon.style.right = right + 'px';
+      audioIcon.style.bottom = bottom + 'px';
+    }
   });
 
-  // تحميل قائمة الأغاني من Firestore
-  db.collection('audioList').get().then(snapshot => {
+  // ===== Toggle Player =====
+  audioIcon.addEventListener('click', ()=>{
+    audioPlayerDiv.style.display = audioPlayerDiv.style.display === 'none' ? 'block' : 'none';
+  });
+
+  // ===== Load Audio List from Firestore =====
+  db.collection('audio').get().then(snapshot => {
     snapshot.forEach(doc => {
       const data = doc.data();
       const div = document.createElement('div');
-      div.classList.add('audioItem');
-      div.textContent = data.title;
+      div.classList.add('audio-item');
+      div.textContent = data.name;
       div.addEventListener('click', ()=>{
         player.src = data.url;
         player.play();
