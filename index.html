@@ -5,9 +5,6 @@
 <title>📚 مكتبتي للمواقع - Baha - (خلفية: لون/صورة في Firestore + تحكم بالخط والشفافية)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-/* ==================================================
-   Extended detailed styles (طويل ومفصّل)
-   ================================================== */
 :root{
   --primary:#2c3e50;
   --accent:#2980b9;
@@ -15,17 +12,15 @@
   --success:#27ae60;
   --muted:#7f8c8d;
   --card:#ffffff;
-  /* تحكم في حجم الخط والشفافية */
-  --base-font-size:14px; /* يمكن تغييره ديناميكياً */
-  --card-opacity:1;      /* شفافية البطاقات */
-  --panel-opacity:1;     /* شفافية اللوحات (القوائم، دردشة) */
-  --img-opacity:1;       /* ما إذا كانت الصور تتبع نفس الشفافية */
+  --base-font-size:14px;
+  --card-opacity:1;
+  --panel-opacity:1;
+  --img-opacity:1;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;}
 body{font-family:Tahoma, Arial, sans-serif;background:linear-gradient(180deg,#eef6fb,#f4f6f9);color:var(--primary);display:flex;flex-direction:column;font-size:var(--base-font-size)}
 
-/* Header */
 header{background:var(--primary);color:white;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
 header h1{font-size:1.15rem;margin:0}
 .user-area{display:flex;align-items:center;gap:10px}
@@ -33,22 +28,19 @@ header h1{font-size:1.15rem;margin:0}
 .btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
 .btn.secondary{background:#fff;color:var(--accent);border:1px solid rgba(0,0,0,0.06)}
 
-/* Layout */
 .layout{display:flex;gap:18px;padding:18px;flex:1;align-items:flex-start;position:relative}
 .board{flex:1;min-width:320px;position:relative}
 .controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
-.controls input[type="text"], .controls input[type="url"]{padding:10px;border-radius:10px;border:1px solid #d0d7de;font-size:14px;flex:1;min-width:140px}
+.controls input{padding:10px;border-radius:10px;border:1px solid #d0d7de;font-size:14px;flex:1;min-width:140px}
 .controls .add-btn{background:var(--accent);padding:10px 16px;border-radius:10px;color:#fff;border:none;cursor:pointer}
 .controls .bg-btn{background:var(--success);color:#fff;padding:10px 16px;border-radius:10px;border:none;cursor:pointer}
 
-/* view control group (حجم الخط و الشفافية) */
 .view-controls{display:flex;gap:8px;align-items:center}
 .view-controls .control-group{display:flex;flex-direction:column;gap:6px;background:rgba(255,255,255,0.06);padding:8px;border-radius:10px;border:1px solid rgba(0,0,0,0.03)}
 .view-controls label{font-size:0.85rem;color:var(--muted)}
 .view-controls input[type='range']{width:160px}
 .view-controls .smallVal{font-size:0.85rem;color:var(--muted);text-align:center}
 
-/* Site cards area */
 #siteList{position:relative;min-height:420px;border-radius:12px;padding:12px;background:transparent}
 .card{position:absolute;width:200px;height:250px;border-radius:12px;box-shadow:0 8px 18px rgba(0,0,0,0.12);overflow:hidden;transition:transform .15s;border:1px solid rgba(0,0,0,0.04);background:rgba(255,255,255,var(--card-opacity));opacity:1}
 .card:hover{transform:translateY(-6px)}
@@ -61,7 +53,6 @@ header h1{font-size:1.15rem;margin:0}
 .card .actions .delete{background:var(--danger);color:#fff}
 .card .actions .edit{background:#f39c12;color:#fff}
 
-/* Side panels (list & chat) */
 .list-panel{background:rgba(255,255,255,var(--panel-opacity));padding:12px;border-radius:12px;box-shadow:0 6px 14px rgba(0,0,0,0.06);min-height:180px;position:absolute;left:20px;top:20px;width:320px;height:240px;z-index:40;border:1px solid rgba(0,0,0,0.06)}
 .list-panel h3{margin:0 0 8px 0;font-size:16px;color:var(--primary)}
 .sites-list-short{display:flex;flex-direction:column;gap:8px;max-height:calc(100% - 56px);overflow:auto}
@@ -81,14 +72,11 @@ header h1{font-size:1.15rem;margin:0}
 .emoji-panel span{cursor:pointer;font-size:20px;margin:5px}
 #chatHint{margin-top:8px;font-size:12px;color:gray;text-align:center}
 
-/* Panel handles (green) */
 .panel-drag-handle{position:absolute;top:8px;right:8px;width:28px;height:28px;background:var(--success);border-radius:8px;cursor:grab;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;z-index:60}
 .panel-resize-handle{position:absolute;left:8px;bottom:8px;width:20px;height:20px;background:var(--success);clip-path:polygon(0 100%,100% 100%,0 0);cursor:nwse-resize;z-index:60}
 
-/* Responsive tweaks */
 @media(max-width:900px){.layout{flex-direction:column}.side{width:100%}.list-panel{position:static;width:auto;height:auto}.chat-panel{position:static;width:auto;height:auto}}
 
-/* Utility */
 .hidden{display:none}
 .small{font-size:12px;color:var(--muted)}
 </style>
@@ -114,7 +102,6 @@ header h1{font-size:1.15rem;margin:0}
       <button id="addBtn" class="add-btn">➕ إضافة</button>
       <button id="changeBgBtn" class="bg-btn">🎨 تغيير الخلفية (لون/صورة)</button>
 
-      <!-- view controls: حجم الخط و الشفافية -->
       <div class="view-controls">
         <div class="control-group" style="min-width:220px;">
           <label for="fontSizeRange">حجم الخط</label>
@@ -142,7 +129,6 @@ header h1{font-size:1.15rem;margin:0}
     <div id="siteList" aria-live="polite"></div>
   </div>
 
-  <!-- قائمة المواقع -->
   <div class="list-panel" id="listPanel" style="position:absolute; left:20px; top:20px; width:320px; height:240px;">
     <div class="panel-drag-handle" title="اسحب">⬍</div>
     <h3>قائمة المواقع</h3>
@@ -150,7 +136,6 @@ header h1{font-size:1.15rem;margin:0}
     <div class="panel-resize-handle" title="تغيير الحجم"></div>
   </div>
 
-  <!-- نافذة الدردشة -->
   <div class="chat-panel" id="chatPanel" style="position:absolute; right:20px; top:260px; width:380px; height:420px;">
     <div class="panel-drag-handle" title="اسحب">⬍</div>
     <h3>الدردشة الحية</h3>
@@ -174,8 +159,8 @@ header h1{font-size:1.15rem;margin:0}
   تحسينات وإصلاحات أمنية ووظيفية:
   - تحقق من روابط http/https قبل استخدامها لتجنّب javascript: XSS.
   - تجنّب innerHTML عند إدراج أسماء المستخدمين أو عناوين المواقع.
-  - استخدم serverTimestamp() لرسائل الدردشة لتجنّب اختلاف توقيت العميل.
-  - استبدال أحداث الفأرة التقليدية بحدث pointer للحساسية عبر الأجهزة (لمس/ماوس).
+  - استخدم serverTimestamp() لرسائل الدردشة.
+  - استبدال أحداث الماوس التقليدية بحدث pointer للحساسية عبر الأجهزة (لمس/ماوس).
   - تقليل عدد عمليات الكتابة المتكررة لواجهة المستخدم عبر debounce.
   - تحقق من صحة روابط صور الخلفية قبل الحفظ.
 */
@@ -185,7 +170,7 @@ import { getFirestore, collection, addDoc, doc, setDoc, updateDoc, deleteDoc, on
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // ----------------------------
-// إعداد Firebase (احتفظ بقيمك أو استبدلها)
+// إعداد Firebase (استبدل إن لزم)
 // ----------------------------
 const firebaseConfig = {
   apiKey: "AIzaSyAMJkL6Fvv9kzgWtHz7ccp79H80EhLogqk",
@@ -202,9 +187,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// ----------------------------
-// DOM Elements
-// ----------------------------
+// DOM
 const addBtn=document.getElementById("addBtn");
 const siteList=document.getElementById("siteList");
 const sitesShort=document.getElementById("sitesShort");
@@ -224,7 +207,6 @@ const changeBgBtn = document.getElementById("changeBgBtn");
 const listPanel = document.getElementById('listPanel');
 const chatPanel = document.getElementById('chatPanel');
 
-// عناصر التحكم الجديدة
 const fontSizeRange = document.getElementById('fontSizeRange');
 const fontSizeValue = document.getElementById('fontSizeValue');
 const opacityRange = document.getElementById('opacityRange');
@@ -236,9 +218,6 @@ let currentUser=null;
 let editId=null;
 let uiSaveTimer = null;
 
-// ----------------------------
-// Helpers
-// ----------------------------
 function isValidHttpUrl(str){
   try{
     const u = new URL(str);
@@ -256,14 +235,11 @@ function createImg(src, alt = ''){
   return img;
 }
 function debounceSaveUI(obj){
-  // minimal debounce to reduce Firestore writes
   if(uiSaveTimer) clearTimeout(uiSaveTimer);
   uiSaveTimer = setTimeout(()=> saveUISettings(obj), 600);
 }
 
-// ----------------------------
 // Authentication
-// ----------------------------
 loginBtn.addEventListener("click",async()=>{
   try{ await signInWithPopup(auth,provider); }catch(e){ alert("فشل تسجيل الدخول: "+e.message); }
 });
@@ -310,9 +286,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// ----------------------------
-// Sites handling (Firestore) - reading is public here, consider restricting with Firestore rules.
-// ----------------------------
+// Sites handling
 const sitesCol = collection(db,"sites");
 onSnapshot(sitesCol, snapshot=>{
   siteList.innerHTML=""; sitesShort.innerHTML="";
@@ -335,7 +309,6 @@ onSnapshot(sitesCol, snapshot=>{
     const deleteBtn=document.createElement("button"); deleteBtn.className="delete"; deleteBtn.textContent="🗑 حذف";
     deleteBtn.onclick=()=> {
       if(!currentUser){ alert('سجّل الدخول أولاً'); return; }
-      // Optional: check ownership in Firestore rules; here we just attempt delete
       deleteDoc(doc(db,"sites",id)).catch(e=>{ console.warn('حذف فشل:', e); alert('تعذّر حذف الموقع'); });
     };
 
@@ -348,7 +321,6 @@ onSnapshot(sitesCol, snapshot=>{
     enableCardDragResize(card,id);
     siteList.appendChild(card);
 
-    // short list item - avoid innerHTML to prevent XSS
     const short=document.createElement("div"); short.className="site-item";
     const sImg = createImg(isValidHttpUrl(site.image) ? site.image : 'https://via.placeholder.com/48x36', site.name);
     const a = document.createElement('a');
@@ -366,7 +338,7 @@ onSnapshot(sitesCol, snapshot=>{
   });
 });
 
-// Add/Edit site (with validation)
+// Add/Edit site
 addBtn.addEventListener("click",async()=>{
   if(!currentUser){ alert("سجّل الدخول أولاً"); return; }
   const name=siteNameInput.value.trim(); const url=siteUrlInput.value.trim();
@@ -378,8 +350,8 @@ addBtn.addEventListener("click",async()=>{
     if(editId){
       await updateDoc(doc(db,"sites",editId),{name,url,image});
       editId=null; addBtn.textContent="➕ إضافة";
-    } else {
-      await addDoc(sitesCol,{name,url,image:leftOrDefault('0px'),left:'0px',top:'0px',width:'200px',height:'250px'});
+    }else{
+      await addDoc(sitesCol,{name,url,image,left:"0px",top:"0px",width:"200px",height:"250px"});
     }
     siteNameInput.value=""; siteUrlInput.value=""; siteImageInput.value="";
   }catch(e){
@@ -389,26 +361,18 @@ addBtn.addEventListener("click",async()=>{
 });
 function openEdit(id){ editId=id; getDoc(doc(db,"sites",id)).then(snap=>{ const data=snap.data(); siteNameInput.value=data.name; siteUrlInput.value=data.url; siteImageInput.value=data.image||""; addBtn.textContent="💾 حفظ التعديل"; }).catch(e=>{ console.warn('openEdit error', e); }); }
 
-function leftOrDefault(v){ return v; }
-
-// ----------------------------
-// Chat handling (Firestore)
-// ----------------------------
+// Chat handling
 const chatCol = collection(db,"chat");
 onSnapshot(query(chatCol, orderBy("timestamp")), snapshot=>{
   chatBox.innerHTML="";
   snapshot.forEach(docSnap=>{
     const msg=docSnap.data();
-    const div=document.createElement("div");
-    div.className="msg "+(msg.uid===currentUser?.uid?"me":"other");
-
+    const div=document.createElement("div"); div.className="msg "+(msg.uid===currentUser?.uid?"me":"other");
     const userInfo = document.createElement("div"); userInfo.style.display="flex"; userInfo.style.alignItems="center"; userInfo.style.gap = "6px"; userInfo.style.marginBottom = "2px";
     const img = document.createElement("img"); img.src = isValidHttpUrl(msg.photoURL) ? msg.photoURL : "https://via.placeholder.com/24"; img.style.width="24px"; img.style.height="24px"; img.style.borderRadius="50%"; img.style.objectFit="cover";
     const name = document.createElement("span"); sanitizeTextNode(name, msg.displayName || "مستخدم"); name.style.fontSize="12px"; name.style.color = msg.uid===currentUser?.uid?"#fff":"#555";
     userInfo.appendChild(img); userInfo.appendChild(name);
-
     const textDiv = document.createElement("div"); sanitizeTextNode(textDiv, msg.text);
-
     div.appendChild(userInfo); div.appendChild(textDiv);
     div.style.maxWidth="70%"; div.style.marginBottom="6px"; div.style.clear="both"; div.style.padding="6px 10px"; div.style.borderRadius="12px"; div.style.wordWrap="break-word";
     div.style.background = msg.uid===currentUser?.uid?"#2980b9":"#e0e0e0"; div.style.color = msg.uid===currentUser?.uid?"#fff":"#000";
@@ -431,9 +395,7 @@ async function sendMsg(){
   }
 }
 
-// ----------------------------
-// Card drag & resize (pointer events for touch & mouse) + save to Firestore for card position/size
-// ----------------------------
+// Card drag & resize (pointer events)
 function enableCardDragResize(card,id){
   let offsetX=0,offsetY=0,isDragging=false;
   let startWidth=0,startHeight=0,isResizing=false;
@@ -448,7 +410,6 @@ function enableCardDragResize(card,id){
     document.body.style.userSelect="none";
     dragHandle.style.cursor = 'grabbing';
   });
-
   resizeHandle.addEventListener("pointerdown", e=>{
     isResizing=true;
     resizeHandle.setPointerCapture(e.pointerId);
@@ -457,14 +418,12 @@ function enableCardDragResize(card,id){
     document.body.style.userSelect="none";
     resizeHandle.style.cursor = 'nwse-resize';
   });
-
   window.addEventListener("pointermove", e=>{
-    if(isDragging){ card.style.left = Math.max(0, e.clientX - offsetX) + "px"; card.style.top = Math.max(0, e.clientY - offsetY) + "px"; }
-    if(isResizing){ card.style.width = Math.max(100, startWidth + (e.clientX - offsetX)) + "px"; card.style.height = Math.max(120, startHeight + (e.clientY - offsetY)) + "px"; }
+    if(isDragging){ card.style.left=Math.max(0,e.clientX-offsetX)+"px"; card.style.top=Math.max(0,e.clientY-offsetY)+"px"; }
+    if(isResizing){ card.style.width=Math.max(100,startWidth+(e.clientX-offsetX))+"px"; card.style.height=Math.max(120,startHeight+(e.clientY-offsetY))+"px"; }
   });
-
-  window.addEventListener("pointerup", async e=>{
-    if(isDragging || isResizing){
+  window.addEventListener("pointerup",async e=>{
+    if(isDragging||isResizing){
       try{
         await updateDoc(doc(db,"sites",id),{left:card.style.left,top:card.style.top,width:card.style.width,height:card.style.height});
       }catch(ex){ console.warn('تعذر تحديث الموقع/الحجم في Firestore:',ex); }
@@ -478,9 +437,7 @@ function enableCardDragResize(card,id){
   });
 }
 
-// ----------------------------
-// Panels drag & resize and save to Firestore (users/<uid>.settings.background & users/<uid>.panels)
-// ----------------------------
+// Panels drag & resize and save
 function enablePanelDragResize(panel, storageKey){
   const dragHandle = panel.querySelector('.panel-drag-handle');
   const resizeHandles = panel.querySelectorAll('.panel-resize-handle');
@@ -568,14 +525,11 @@ function applyPanelsFromObject(obj){
   }catch(e){ console.warn('خطأ تطبيق حالة اللوحات من Firestore', e); }
 }
 
-// تفعيل السحب/التغيير
 applySavedPanels();
 enablePanelDragResize(listPanel,'listPanel');
 enablePanelDragResize(chatPanel,'chatPanel');
 
-// ----------------------------
 // Emoji panel toggle
-// ----------------------------
 function toggleEmojiPanel(){
   if(emojiPanel.style.display==='block'){ emojiPanel.style.display='none'; emojiPanel.setAttribute('aria-hidden','true'); }
   else{
@@ -587,12 +541,7 @@ function toggleEmojiPanel(){
   }
 }
 
-// ----------------------------
-// Background: apply & save (color or image)
-// Structure in Firestore:
-// users/<uid>.settings.background = { type: 'color'|'image', value: '#ffffff' OR 'https://...' }
-// Also keep a copy in localStorage under key 'backgroundSetting' as fallback.
-// ----------------------------
+// Background apply & save
 function applyBackgroundFromObject(bgObj){
   try{
     if(!bgObj) return;
@@ -619,11 +568,7 @@ function applyBackgroundFromLocal(){
   }catch(e){ console.warn('applyBackgroundFromLocal error', e); document.body.style.background = "linear-gradient(180deg,#eef6fb,#f4f6f9)"; }
 }
 
-// ----------------------------
-// UI settings: font size & opacity
-// stores in localStorage under 'uiSettings' and in Firestore under users/<uid>.settings.ui
-// ui = { fontSize: 14, opacity: 1, applyToImages: false }
-// ----------------------------
+// UI settings
 function applyFontSize(size){
   try{
     const px = (typeof size === 'number' ? size : parseInt(size)) + 'px';
@@ -693,7 +638,6 @@ function syncUIControls(ui){
   }catch(e){ console.warn('syncUIControls error', e); }
 }
 
-// Event listeners for view controls (debounced saves)
 fontSizeRange.addEventListener('input', e=>{
   const val = parseInt(e.target.value);
   applyFontSize(val);
@@ -720,9 +664,7 @@ resetViewBtn.addEventListener('click', ()=>{
   alert('تمت إعادة إعدادات العرض إلى الافتراضي.');
 });
 
-// ----------------------------
-// UI flow: عند الضغط على زر تغيير الخلفية
-// ----------------------------
+// Change background flow
 changeBgBtn.addEventListener('click', async ()=>{
   const choice = prompt('اكتب "color" لاختيار لون (مثال: #ffffff) أو "image" لوضع رابط صورة للخلفية:');
   if(!choice) return;
@@ -746,7 +688,6 @@ changeBgBtn.addEventListener('click', async ()=>{
   }
 });
 
-// Helper to save background setting (both Firestore and localStorage)
 async function saveBackgroundSetting(bgObj){
   try{
     localStorage.setItem('backgroundSetting', JSON.stringify(bgObj));
@@ -765,12 +706,8 @@ async function saveBackgroundSetting(bgObj){
   }
 }
 
-// عند التحميل، حاول تطبيق الخلفية من localStorage (إذا لم يتم استرجاعها من Firestore أثناء تسجيل الدخول)
 window.addEventListener('load', ()=>{ applyBackgroundFromLocal(); applyUISettingsFromLocal(); });
 
-// ----------------------------
-// حفظ حالة اللوحات عند الخروج في حال وجود مستخدم
-// ----------------------------
 window.addEventListener('beforeunload', async ()=>{
   try{
     if(currentUser){
@@ -796,7 +733,6 @@ window.addEventListener('beforeunload', async ()=>{
     }
   }catch(e){ console.warn('تعذر حفظ حالة اللوحات عند الخروج', e); }
 });
-
 </script>
 </body>
 </html>
